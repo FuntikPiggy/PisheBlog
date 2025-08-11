@@ -1,10 +1,14 @@
 from django.conf import settings
+from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 
+
+from .validators import not_me_username_validator
 from . import constants
 
-class YaUser(AbstractUser):
-    """Модель пользователя, таблица reviews_yauser."""
+class FgUser(AbstractUser):
+    """Модель пользователя, таблица users."""
 
     username = models.CharField(
         max_length=constants.USERNAME_LENGTH,
@@ -23,6 +27,11 @@ class YaUser(AbstractUser):
         unique=True,
         verbose_name='E-mail адрес',
     )
+    avatar = models.ImageField(
+        upload_to='users/avatars/',
+        null=True,
+        default=None
+    )
 
     class Meta:
         verbose_name = 'пользователь'
@@ -32,6 +41,6 @@ class YaUser(AbstractUser):
 
     def __str__(self):
         return (f'{self.username[:64]=} '
-                f'{self.email[:64]=} '
-                f'{self.role[:16]=} '
-                f'{self.bio[:64]=} ')
+                f'{self.first_name[:64]=} '
+                f'{self.last_name[:64]=} '
+                f'{self.email[:64]=} ')
