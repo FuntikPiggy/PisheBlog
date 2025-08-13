@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractUser, UserManager
 # from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 
+from recipes.models import Recipe
 # from .validators import not_me_username_validator
 from . import constants
 
@@ -51,6 +52,7 @@ class FgUser(AbstractUser):
         symmetrical=False,
         related_name='follower',
     )
+    recipes = models.ManyToManyField(Recipe)
 
     class Meta:
         verbose_name = 'пользователь'

@@ -1,6 +1,11 @@
+from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import ForeignKey
 
 from . import constants
+
+
+User = get_user_model()
 
 class Tag(models.Model):
     """Модель тэга, таблица recipes_tag."""
@@ -44,3 +49,38 @@ class Ingredient(models.Model):
     def __str__(self):
         return (f'{self.name[:32]=} '
                 f'{self.measurement_unit[:32]=}')
+
+
+class CookingTimeField(models.PositiveSmallIntegerField):
+    """Формат поля для времени приготовления >=1."""
+
+    def formfield(self, **kwargs):
+        return super(
+            models.PositiveSmallIntegerField,
+            self
+        ).formfield(**{"min_value": 1, **kwargs,})
+
+
+class Recipe(models.Model):
+    """Модель рецепта, таблица recipes_recipe."""
+
+    name = models.CharField(max_length=constants.RECIPE_NAME_LENGTH,)
+    text = models.TextField()
+    cooking_time = CookingTimeField()
+    author = ForeignKey(User, on_delete=models.CASCADE)
+    image = models.ImageField(
+        upload_to='recipes/images/',
+        null=True,
+        default=None
+    )
+    ingredients = models.ManyToManyField(Ingredient,)
+    tags = models.ManyToManyField(Tag,)
+
+    class Meta:
+        ordering = ('name',)
+        default_related_name = 'recipes'
+
+    def __str__(self):
+        return (f'{self.name[:32]=} '
+                f'{self.ingredients.__str__()=}'
+                f'{self.tags.__str__()=}')

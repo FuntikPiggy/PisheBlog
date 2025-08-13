@@ -1,21 +1,18 @@
-from rest_framework.viewsets import ReadOnlyModelViewSet
+from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 
-from recipes.models import Tag, Ingredient
+from recipes.models import Tag, Ingredient, Recipe
 
 
-class CategoryGenreViewSet(ReadOnlyModelViewSet):
-    """Представление моделей тэга и ингредиента."""
+class TagViewSet(ReadOnlyModelViewSet):
+    """Представление модели тэга."""
+    queryset = Tag.objects.all()
 
-    # filter_backends = (filters.SearchFilter,)
-    # search_fields = ('name',)
-    # permission_classes = (IsAdminOrReadOnly,)
 
-    def get_queryset(self):
-        if self.basename == 'tag':
-            return Tag.objects.all()
-        return Ingredient.objects.all()
+class IngredientViewSet(ReadOnlyModelViewSet):
+    """Представление модели ингредиента."""
+    queryset = Ingredient.objects.all()
 
-    # def get_serializer_class(self):
-    #     if self.basename == 'genre':
-    #         return TagSerializer
-    #     return IngredientSerializer
+
+class RecipeViewSet(ModelViewSet):
+    queryset = Recipe.objects.all()
+    http_method_names = ['get', 'post', 'patch', 'delete']
