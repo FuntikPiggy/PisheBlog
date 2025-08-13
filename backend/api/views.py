@@ -1,15 +1,15 @@
 from django.contrib.auth import get_user_model
+from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 
-from rest_framework import status
+from rest_framework import status, permissions
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 
 from recipes.models import Tag, Ingredient, Recipe
-from recipes.serializers import TagSerializer, IngredientSerializer, RecipeSerializer
-from .serializers import SubscriptionsSerializer
+from .serializers import TagSerializer, IngredientSerializer, RecipeSerializer, SubscriptionsSerializer
 
 
 User = get_user_model()
@@ -43,17 +43,37 @@ class FgUserViewSet(UserViewSet):
 
 class TagViewSet(ReadOnlyModelViewSet):
     """Представление модели тэга."""
+
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
     """Представление модели ингредиента."""
+
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 class RecipeViewSet(ModelViewSet):
+    """Представление модели рецепта."""
+
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('author', 'tags',)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     http_method_names = ['get', 'post', 'patch', 'delete']
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    def get_serializer_context(self):
+        return {
+            'request': self.request,
+            'format': self.format_kwarg,
+            'view': self,
+            'tags': Tag.objects.all(),
+        }

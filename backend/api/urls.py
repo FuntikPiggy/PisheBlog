@@ -9,7 +9,7 @@ from .views import FgUserViewSet, TagViewSet, IngredientViewSet, RecipeViewSet
 app_name = 'api'
 
 router = DefaultRouter()
-router.register('users', FgUserViewSet)
+router.register('users', FgUserViewSet, basename='user')
 router.register('tags', TagViewSet, basename='tag')
 router.register('ingredients', IngredientViewSet, basename='ingredient')
 router.register('recipes', RecipeViewSet, basename='recipe')

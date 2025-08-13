@@ -5,7 +5,7 @@ from django.core.files.base import ContentFile
 from djoser.serializers import UserSerializer
 from rest_framework import serializers
 
-from recipes.models import Tag, Ingredient, Recipe
+from recipes.models import Tag, Ingredient, Recipe, RecipeTag, RecipeIngredient
 
 User = get_user_model()
 
@@ -84,9 +84,8 @@ class IngredientSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор данных модели Recipe."""
 
-    tags = TagSerializer(many=True, read_only=True)
-    author = serializers.PrimaryKeyRelatedField(read_only=True)
-    ingredients = IngredientSerializer(many=True, read_only=True)
+    tags = TagSerializer(many=True, required=False)
+    ingredients = IngredientSerializer(many=True, required=False)
     is_favorited = serializers.SerializerMethodField(read_only=True)
     is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
 
@@ -96,9 +95,26 @@ class RecipeSerializer(serializers.ModelSerializer):
             'id', 'tags', 'author', 'ingredients', 'is_favorited',
             'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time',
         )
+        read_only_fields = ('owner',)
 
     def get_is_favorited(self, obj):
-        return True
+        return False
 
     def get_is_in_shopping_cart(self, obj):
-        return True
+        return False
+
+    def create(self, validated_data):
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('ingredients')
+        recipe = Recipe.objects.create(**validated_data)
+        for tag in tags:
+            current_tag, status = Tag.objects.get(**tag)
+            RecipeTag.objects.create(tag=current_tag, recipe=recipe)
+        for ingredient in ingredients:
+            current_ingredient, status = Ingredient.objects.get_or_create(
+                **ingredient
+            )
+            RecipeIngredient.objects.create(
+                ingredient=current_ingredient, recipe=recipe
+            )
+        return recipe

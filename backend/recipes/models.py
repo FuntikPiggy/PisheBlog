@@ -86,10 +86,12 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         Ingredient,
+        through='RecipeIngredient',
         verbose_name='Ингредиенты',
     )
     tags = models.ManyToManyField(
         Tag,
+        through='RecipeTag',
         verbose_name='Тэги',
     )
 
@@ -101,3 +103,21 @@ class Recipe(models.Model):
         return (f'{self.name[:32]=} '
                 f'{self.ingredients.__str__()=}'
                 f'{self.tags.__str__()=}')
+
+
+class RecipeTag(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return (f'{self.recipe.name[:32]=} '
+                f'{self.tag.name[:32]=}')
+
+
+class RecipeIngredient(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return (f'{self.recipe.name[:32]=} '
+                f'{self.ingredient.name[:32]=}')

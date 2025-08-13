@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework.authtoken',
     'rest_framework',
+    'django_filters',
     'corsheaders',
     'djoser',
     'users.apps.UsersConfig',
@@ -134,11 +135,15 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '10000/day',
+        'anon': '1000/day',
+    }
 }
 
 
 DJOSER = {
-    'SERIALIZERS': {'user': 'users.serializers.CustomUserSerializer',},
+    'SERIALIZERS': {'user': 'api.serializers.CustomUserSerializer',},
     'HIDE_USERS': False,
     # 'USER_ID_FIELD': 'id',
     # 'LOGIN_FIELD': 'email',
