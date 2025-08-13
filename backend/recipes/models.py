@@ -39,7 +39,6 @@ class Ingredient(models.Model):
     )
     measurement_unit = models.SlugField(
         max_length=constants.INGREDIENT_MEASURE_LENGTH,
-        unique=True,
         verbose_name='Единица измерения',
     )
 
@@ -64,17 +63,35 @@ class CookingTimeField(models.PositiveSmallIntegerField):
 class Recipe(models.Model):
     """Модель рецепта, таблица recipes_recipe."""
 
-    name = models.CharField(max_length=constants.RECIPE_NAME_LENGTH,)
-    text = models.TextField()
-    cooking_time = CookingTimeField()
-    author = ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(
+        max_length=constants.RECIPE_NAME_LENGTH,
+        verbose_name='Название',
+    )
+    text = models.TextField(
+        verbose_name='Текст',
+    )
+    cooking_time = CookingTimeField(
+        verbose_name='Время приготовления',
+    )
+    author = ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name = 'Автор',
+    )
     image = models.ImageField(
         upload_to='recipes/images/',
         null=True,
-        default=None
+        default=None,
+        verbose_name='Изображение',
     )
-    ingredients = models.ManyToManyField(Ingredient,)
-    tags = models.ManyToManyField(Tag,)
+    ingredients = models.ManyToManyField(
+        Ingredient,
+        verbose_name='Ингредиенты',
+    )
+    tags = models.ManyToManyField(
+        Tag,
+        verbose_name='Тэги',
+    )
 
     class Meta:
         ordering = ('name',)

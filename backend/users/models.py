@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractUser, UserManager
 # from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 
-from recipes.models import Recipe
+# from recipes.models import Recipe
 # from .validators import not_me_username_validator
 from . import constants
 
@@ -27,10 +27,6 @@ class FgUser(AbstractUser):
     username = models.CharField(
         max_length=constants.USERNAME_LENGTH,
         unique=True,
-        # validators=(
-        #     UnicodeUsernameValidator(),
-        #     not_me_username_validator,
-        # ),
         verbose_name='Псевдоним',
         help_text=f'Используются только буквы, цифры и символы @/./+/-/_ .'
                   # f'Нельзя использовать "{settings.USERS_URL_SUFFIX}" в '
@@ -52,7 +48,7 @@ class FgUser(AbstractUser):
         symmetrical=False,
         related_name='follower',
     )
-    recipes = models.ManyToManyField(Recipe)
+    # recipes = models.ManyToManyField(Recipe)
 
     class Meta:
         verbose_name = 'пользователь'
@@ -67,7 +63,7 @@ class FgUser(AbstractUser):
                 f'{self.email[:64]=} ')
 
 
-User = get_user_model()
+# User = get_user_model()
 
 
 # class Subscriptions(models.Model):
