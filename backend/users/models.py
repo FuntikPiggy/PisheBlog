@@ -1,6 +1,8 @@
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from recipes.models import Recipe
 from . import constants
 
 
@@ -28,13 +30,16 @@ class FgUser(AbstractUser):
     subscriptions = models.ManyToManyField(
         'self',
         symmetrical=False,
-        related_name='follower',
+        related_name='followers',
     )
-    # subscriptions = models.ManyToManyField(
-    #     'self',
-    #     symmetrical=False,
-    #     related_name='follower',
-    # )
+    favorites = models.ManyToManyField(
+        Recipe,
+        through='Favorites',
+    )
+    shopping_cart = models.ManyToManyField(
+        Recipe,
+        through='ShoppingCart',
+    )
 
     class Meta:
         verbose_name = 'пользователь'
@@ -47,3 +52,24 @@ class FgUser(AbstractUser):
                 f'{self.first_name[:64]=} '
                 f'{self.last_name[:64]=} '
                 f'{self.email[:64]=} ')
+
+
+User = get_user_model()
+
+
+class Favorites(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return (f'{self.user.username[:32]=} '
+                f'{self.recipe.name[:32]=}')
+
+
+class ShoppingCart(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return (f'{self.user.username[:32]=} '
+                f'{self.recipe.name[:32]=}')
