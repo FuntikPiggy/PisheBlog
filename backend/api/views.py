@@ -10,7 +10,6 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 
 from recipes.models import Tag, Ingredient, Recipe
-from .filters import IsInFavoritesFilterBackend
 from .permissions import IsAuthorOrStaffOrReadOnly
 from .serializers import TagSerializer, IngredientSerializer, RecipeInSerializer, SubscriptionsSerializer, \
     RecipeOutSerializer
@@ -74,8 +73,8 @@ class RecipeViewSet(ModelViewSet):
     # queryset = Recipe.objects.prefetch_related(Prefetch('ingredients_amount', queryset=RecipeIngredient.objects.all()))
     queryset = Recipe.objects.all().prefetch_related('ingredients', 'recipeingredients')
     serializer_class = RecipeInSerializer
-    filter_backends = (DjangoFilterBackend, IsInFavoritesFilterBackend,)
-    filterset_fields = ('author', 'tags',)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('author', 'tags', 'is_favorited', 'is_in_shopping_cart',)
     pagination_class = LimitOffsetPagination
     permission_classes = (AllowAny,)
     http_method_names = ['get', 'post', 'patch', 'delete']

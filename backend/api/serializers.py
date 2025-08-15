@@ -147,10 +147,10 @@ class RecipeOutSerializer(BaseRecipeSerializer):
     ingredients = serializers.SerializerMethodField()
 
     def get_is_favorited(self, obj):
-        return obj in self.context['request'].user.favorites.all()
+        return self.context['request'].user in obj.is_favorited.all()
 
     def get_is_in_shopping_cart(self, obj):
-        return obj in self.context['request'].user.shopping_cart.all()
+        return self.context['request'].user in obj.is_in_shopping_cart.all()
 
     def get_ingredients(self, obj):
         recipe_ingredients = {d.ingredient_id: d.amount for d in obj.recipeingredients.all()}
