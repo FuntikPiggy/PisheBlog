@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework.authtoken',
     'rest_framework',
+    'admin_reorder',
     'django_filters',
     # 'corsheaders',
     'djoser',
@@ -40,8 +41,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'admin_reorder.middleware.ModelAdminReorder',
 ]
-
 
 # CORS_ORIGIN_ALLOW_ALL = True
 # CORS_URLS_REGEX = r'^/api/.*$'
@@ -106,7 +107,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = 'ru-RU'
+LANGUAGE_CODE = 'ru-Ru'
 
 TIME_ZONE = 'Europe/Moscow'
 
@@ -149,3 +150,9 @@ DJOSER = {
 }
 
 AUTH_USER_MODEL = 'recipes.FgUser'
+
+
+ADMIN_REORDER = (
+    {'app': 'auth', 'models': (AUTH_USER_MODEL, 'auth.Group'),},
+    {'app': 'recipes', 'models': ('recipes.Recipe', 'recipes.Ingredient', 'recipes.Tag',),},
+)

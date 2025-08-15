@@ -83,42 +83,21 @@ class TagSerializer(serializers.ModelSerializer):
 class IngredientSerializer(serializers.ModelSerializer):
     """Сериализатор данных модели Ingredient."""
 
-    class Meta:
-        model = Ingredient
-        fields = ('id', 'name', 'measurement_unit',)
-
-
-class IngredientToRecipeSerializer(serializers.ModelSerializer):
-    """Сериализатор данных модели Ingredient для Recipe."""
-
-    # id = serializers.SerializerMethodField()
-    # name = serializers.SerializerMethodField()
-    # measurement_unit = serializers.SerializerMethodField()
-    # amount = serializers.SerializerMethodField()
     amount = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
-    # def get_id(self, obj):
-    #     return obj.id
-    #
-    # def get_name(self, obj):
-    #     return obj.name
-    #
-    # def get_measurement_unit(self, obj):
-    #     return obj.measurement_unit
-    # def to_representation(self, instance):
-    #     self._context["request"] = self.parent.context["request"]
-    #     return super().to_representation(instance)
 
-    # def get_amount(self, obj):
-    # #     # a = self.amount
-    # #     # b = obj.ingredients_amount.get(recipe_id=obj.id)
-    #     asd = (f'{obj.id=}')
-    # #     c = obj.ingredients_amount.get(recipe_id=obj.id).amount
-    #     return obj.ingredients_amount.get(recipe_id=obj.id).amount
+# class IngredientToRecipeSerializer(serializers.ModelSerializer):
+#     """Сериализатор данных модели Ingredient для Recipe."""
+#
+#     amount = serializers.IntegerField(read_only=True)
+#
+#     class Meta:
+#         model = Ingredient
+#         fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
 class RecipeInSerializer(serializers.ModelSerializer):
@@ -151,23 +130,12 @@ class RecipeInSerializer(serializers.ModelSerializer):
         return recipe
 
 
-# class Ingr(serializers.Field):
-#     def to_representation(self, value):
-#         a = 1
-#         return value
-#     def to_internal_value(self, data):
-#         return data
-
-
-
 class RecipeOutSerializer(serializers.ModelSerializer):
     """Сериализатор вывода данных модели Recipe."""
 
     author = CustomUserSerializer()
     tags = TagSerializer(many=True,)
-    # ingredients = Ingr()
-    ingredients = serializers.SerializerMethodField(read_only=True)
-    # ingredients = IngredientToRecipeSerializer(many=True,)
+    ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
@@ -177,26 +145,18 @@ class RecipeOutSerializer(serializers.ModelSerializer):
             'id', 'tags', 'author', 'ingredients', 'is_favorited',
             'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time',
         )
+        read_only_fields = ('id', 'author', 'ingredients', 'is_favorited', 'is_in_shopping_cart')
 
     def get_is_favorited(self, obj):
-        return True
+        return obj in self.context['request'].user.favorites.all()
 
     def get_is_in_shopping_cart(self, obj):
-        return True
+        return obj in self.context['request'].user.shopping_cart.all()
 
     def get_ingredients(self, obj):
         recipeingredients = {d.ingredient_id: d.amount for d in obj.recipeingredients.all()}
-        # ingredients = Ingredient.objects.filter(recipeingredients__recipe_id = obj.id)
         ingredients = obj.ingredients.all()
-        # ingredients = self.context['queryset'][obj.id].values('ingredient__id', 'ingredient__name', 'ingredient__measurement_unit', 'ingredient__amount')
-        # ingredients = self.context['queryset'][obj.id].ingredients.all().annotate(amount='ingredient_amount.amount')
-
-
         for ingredient in ingredients:
-            # psc = RecipeIngredient.objects.get(recipe_id = obj.id, ingredient_id = ingredient.id)
-            # ingredient.amount = psc.amount
             ingredient.amount = recipeingredients[ingredient.id]
-
-        serializer = IngredientToRecipeSerializer(ingredients, many=True)
-
+        serializer = IngredientSerializer(ingredients, many=True)
         return serializer.data

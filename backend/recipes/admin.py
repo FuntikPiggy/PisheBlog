@@ -1,12 +1,16 @@
 from django.contrib import admin
+from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 
-from .models import Tag, Ingredient, Recipe, FgUser
+from .models import Tag, Ingredient, Recipe
 
 
-@admin.register(FgUser)
+User = get_user_model()
+
+@admin.register(User)
 class FgUserAdmin(UserAdmin):
     """Настройки раздела пользователей админ-панели."""
+
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = super().get_fieldsets(request, obj)
