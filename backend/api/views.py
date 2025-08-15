@@ -1,17 +1,20 @@
 from django.contrib.auth import get_user_model
-from django.db.models import Prefetch
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 
-from rest_framework import status, permissions
+from rest_framework import status, permissions, filters
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 
-from recipes.models import Tag, Ingredient, Recipe, RecipeIngredient
+from recipes.models import Tag, Ingredient, Recipe
+from .filters import IsInFavoritesFilterBackend
+from .permissions import IsAuthorOrStaffOrReadOnly
 from .serializers import TagSerializer, IngredientSerializer, RecipeInSerializer, SubscriptionsSerializer, \
     RecipeOutSerializer
+
 
 User = get_user_model()
 
@@ -20,7 +23,10 @@ class FgUserViewSet(UserViewSet):
     http_method_names = ['get', 'post', 'put', 'delete']
     pagination_class = LimitOffsetPagination
 
-    @action(['get',], url_path='subscriptions', detail=False)
+    @action(
+        ['get',], url_path='subscriptions',
+        detail=False, permission_classes=(IsAuthorOrStaffOrReadOnly,)
+    )
     def get_subscriptions(self, request):
         return Response(
             SubscriptionsSerializer(
@@ -31,7 +37,10 @@ class FgUserViewSet(UserViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(['put', 'delete'], url_path='me/avatar', detail=False)
+    @action(
+        ['put', 'delete'], url_path='me/avatar',
+        detail=False, permission_classes=(IsAuthorOrStaffOrReadOnly,)
+    )
     def avatar(self, request, *args, **kwargs):
         self.get_object = self.get_instance
         if request.method == 'PUT':
@@ -55,6 +64,8 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    filter_backends = (filters.SearchFilter, )
+    search_fields = ('^name',)
 
 
 class RecipeViewSet(ModelViewSet):
@@ -63,10 +74,10 @@ class RecipeViewSet(ModelViewSet):
     # queryset = Recipe.objects.prefetch_related(Prefetch('ingredients_amount', queryset=RecipeIngredient.objects.all()))
     queryset = Recipe.objects.all().prefetch_related('ingredients', 'recipeingredients')
     serializer_class = RecipeInSerializer
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, IsInFavoritesFilterBackend,)
     filterset_fields = ('author', 'tags',)
     pagination_class = LimitOffsetPagination
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (AllowAny,)
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_serializer_context(self):

@@ -78,40 +78,51 @@ class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ('id', 'name', 'slug',)
+        read_only_fields = ('id', 'name', 'slug',)
 
 
 class IngredientSerializer(serializers.ModelSerializer):
     """Сериализатор данных модели Ingredient."""
 
-    amount = serializers.IntegerField(read_only=True)
+    class Meta:
+        model = Ingredient
+        fields = ('id', 'name', 'measurement_unit',)
+
+
+class IngredientToRecipeSerializer(serializers.ModelSerializer):
+    """Сериализатор данных модели Ingredient для Recipe."""
+
+    amount = serializers.IntegerField()
 
     class Meta:
         model = Ingredient
-        fields = ('id', 'name', 'measurement_unit', 'amount')
+        fields = ('id', 'name', 'measurement_unit', 'amount',)
 
 
-# class IngredientToRecipeSerializer(serializers.ModelSerializer):
-#     """Сериализатор данных модели Ingredient для Recipe."""
-#
-#     amount = serializers.IntegerField(read_only=True)
-#
-#     class Meta:
-#         model = Ingredient
-#         fields = ('id', 'name', 'measurement_unit', 'amount')
+class BaseRecipeSerializer(serializers.ModelSerializer):
+    """Базовый класс для сериализаторов модели Recipe."""
 
-
-class RecipeInSerializer(serializers.ModelSerializer):
-    """Сериализатор ввода данных модели Recipe."""
-
-    tags = TagSerializer(many=True, required=False)
-    ingredients = IngredientSerializer(many=True, required=False)
+    author = CustomUserSerializer()
+    tags = TagSerializer(many=True,)
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
         fields = (
-            'ingredients', 'tags', 'image',
-            'name', 'text', 'cooking_time',
+            'id', 'tags', 'author', 'ingredients', 'is_favorited',
+            'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time',
         )
+        read_only_fields = (
+            'id', 'author', 'ingredients',
+            'is_favorited', 'is_in_shopping_cart',
+        )
+
+
+class RecipeInSerializer(BaseRecipeSerializer):
+    """Сериализатор ввода данных модели Recipe."""
+
+    ingredients = IngredientToRecipeSerializer(many=True,)
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')
@@ -130,22 +141,10 @@ class RecipeInSerializer(serializers.ModelSerializer):
         return recipe
 
 
-class RecipeOutSerializer(serializers.ModelSerializer):
+class RecipeOutSerializer(BaseRecipeSerializer):
     """Сериализатор вывода данных модели Recipe."""
 
-    author = CustomUserSerializer()
-    tags = TagSerializer(many=True,)
     ingredients = serializers.SerializerMethodField()
-    is_favorited = serializers.SerializerMethodField()
-    is_in_shopping_cart = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Recipe
-        fields = (
-            'id', 'tags', 'author', 'ingredients', 'is_favorited',
-            'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time',
-        )
-        read_only_fields = ('id', 'author', 'ingredients', 'is_favorited', 'is_in_shopping_cart')
 
     def get_is_favorited(self, obj):
         return obj in self.context['request'].user.favorites.all()
@@ -154,9 +153,9 @@ class RecipeOutSerializer(serializers.ModelSerializer):
         return obj in self.context['request'].user.shopping_cart.all()
 
     def get_ingredients(self, obj):
-        recipeingredients = {d.ingredient_id: d.amount for d in obj.recipeingredients.all()}
+        recipe_ingredients = {d.ingredient_id: d.amount for d in obj.recipeingredients.all()}
         ingredients = obj.ingredients.all()
         for ingredient in ingredients:
-            ingredient.amount = recipeingredients[ingredient.id]
-        serializer = IngredientSerializer(ingredients, many=True)
+            ingredient.amount = recipe_ingredients[ingredient.id]
+        serializer = IngredientToRecipeSerializer(ingredients, many=True)
         return serializer.data
