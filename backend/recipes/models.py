@@ -1,11 +1,66 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import ForeignKey
 
 from . import constants
 
 
+class FgUser(AbstractUser):
+    """Модель пользователя, таблица users_fguser."""
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ('username', 'first_name', 'last_name',)
+    username = models.CharField(
+        max_length=constants.USERNAME_LENGTH,
+        unique=True,
+        verbose_name='Псевдоним',
+        help_text=f'Используются только буквы, цифры и символы @/./+/-/_ .',
+    )
+    email = models.EmailField(
+        max_length=constants.EMAIL_LENGTH,
+        unique=True,
+        verbose_name='E-mail адрес',
+    )
+    avatar = models.ImageField(
+        upload_to='users/avatars/',
+        null=True,
+        default=None,
+        verbose_name='Аватар',
+    )
+    subscriptions = models.ManyToManyField(
+        'self',
+        symmetrical=False,
+        related_name='followers',
+        verbose_name='Подписки',
+    )
+    favorites = models.ManyToManyField(
+        'Recipe',
+        through='UserFavorites',
+        verbose_name='Избранное',
+    )
+    shopping_cart = models.ManyToManyField(
+        'Recipe',
+        through='UserShoppingCart',
+        related_name='cart_users',
+        verbose_name='Список покупок',
+    )
+
+    class Meta:
+        verbose_name = 'пользователь'
+        verbose_name_plural = 'Пользователи'
+        default_related_name = 'users'
+        ordering = ('username',)
+
+    def __str__(self):
+        return (f'{self.username[:64]=} '
+                f'{self.first_name[:64]=} '
+                f'{self.last_name[:64]=} '
+                f'{self.email[:64]=} ')
+
+
 User = get_user_model()
+
 
 class Tag(models.Model):
     """Модель тэга, таблица recipes_tag."""
@@ -18,10 +73,13 @@ class Tag(models.Model):
     slug = models.SlugField(
         max_length=constants.TAG_SLUG_LENGTH,
         unique=True,
+        null=True,
         verbose_name='Слаг',
     )
 
     class Meta:
+        verbose_name = 'тэг'
+        verbose_name_plural = 'Тэги'
         ordering = ('name',)
 
     def __str__(self):
@@ -43,6 +101,8 @@ class Ingredient(models.Model):
     )
 
     class Meta:
+        verbose_name = 'ингредиент'
+        verbose_name_plural = 'Ингредиенты'
         ordering = ('name',)
 
     def __str__(self):
@@ -96,6 +156,8 @@ class Recipe(models.Model):
     )
 
     class Meta:
+        verbose_name = 'рецепт'
+        verbose_name_plural = 'Рецепты'
         ordering = ('name',)
         default_related_name = 'recipes'
 
@@ -115,9 +177,37 @@ class RecipeTag(models.Model):
 
 
 class RecipeIngredient(models.Model):
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,)
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE,)
+    amount = models.PositiveSmallIntegerField()
+
+    class Meta:
+        default_related_name = 'recipeingredients'
 
     def __str__(self):
         return (f'{self.recipe.name[:32]=} '
                 f'{self.ingredient.name[:32]=}')
+
+
+class UserFavorites(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+
+    class Meta:
+        default_related_name = 'user_favorites'
+
+    def __str__(self):
+        return (f'{self.user.username[:32]=} '
+                f'{self.recipe.name[:32]=}')
+
+
+class UserShoppingCart(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+
+    class Meta:
+        default_related_name = 'user_shopping_cart'
+
+    def __str__(self):
+        return (f'{self.user.username[:32]=} '
+                f'{self.recipe.name[:32]=}')

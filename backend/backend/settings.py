@@ -26,16 +26,15 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework',
     'django_filters',
-    'corsheaders',
+    # 'corsheaders',
     'djoser',
-    'users.apps.UsersConfig',
     'recipes.apps.RecipesConfig',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
+    # 'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -45,10 +44,10 @@ MIDDLEWARE = [
 
 
 # CORS_ORIGIN_ALLOW_ALL = True
-CORS_URLS_REGEX = r'^/api/.*$'
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-]
+# CORS_URLS_REGEX = r'^/api/.*$'
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:9000',
+# ]
 
 
 ROOT_URLCONF = 'backend.urls'
@@ -149,4 +148,4 @@ DJOSER = {
     # 'LOGIN_FIELD': 'email',
 }
 
-AUTH_USER_MODEL = 'users.FgUser'
+AUTH_USER_MODEL = 'recipes.FgUser'

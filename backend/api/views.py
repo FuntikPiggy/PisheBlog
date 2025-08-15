@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db.models import Prefetch
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 
@@ -8,9 +9,9 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 
-from recipes.models import Tag, Ingredient, Recipe
-from .serializers import TagSerializer, IngredientSerializer, RecipeSerializer, SubscriptionsSerializer
-
+from recipes.models import Tag, Ingredient, Recipe, RecipeIngredient
+from .serializers import TagSerializer, IngredientSerializer, RecipeInSerializer, SubscriptionsSerializer, \
+    RecipeOutSerializer
 
 User = get_user_model()
 
@@ -18,7 +19,6 @@ User = get_user_model()
 class FgUserViewSet(UserViewSet):
     http_method_names = ['get', 'post', 'put', 'delete']
     pagination_class = LimitOffsetPagination
-
 
     @action(['get',], url_path='subscriptions', detail=False)
     def get_subscriptions(self, request):
@@ -41,12 +41,12 @@ class FgUserViewSet(UserViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class TagViewSet(ReadOnlyModelViewSet):
+class TagViewSet(ModelViewSet):
     """Представление модели тэга."""
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.AllowAny,)
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
@@ -60,21 +60,39 @@ class IngredientViewSet(ReadOnlyModelViewSet):
 class RecipeViewSet(ModelViewSet):
     """Представление модели рецепта."""
 
-    queryset = Recipe.objects.all()
-    serializer_class = RecipeSerializer
+    # queryset = Recipe.objects.prefetch_related(Prefetch('ingredients_amount', queryset=RecipeIngredient.objects.all()))
+    queryset = Recipe.objects.all().prefetch_related('ingredients', 'recipeingredients')
+    serializer_class = RecipeInSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('author', 'tags',)
     pagination_class = LimitOffsetPagination
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     http_method_names = ['get', 'post', 'patch', 'delete']
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        if self.action == 'create':
+            return context
+        context.update({'queryset': self.queryset})
+        return context
+
+    # def get_queryset(self):
+    #     # queryset = list(RecipeIngredient.objects.all().select_related('recipe', 'ingredient'))
+    #     queryset = list(Recipe.objects.prefetch_related(Prefetch('ingredients_amount', queryset=RecipeIngredient.objects.all())))
+    #     return queryset
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return self.serializer_class
+        return RecipeOutSerializer
+
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    def get_serializer_context(self):
-        return {
-            'request': self.request,
-            'format': self.format_kwarg,
-            'view': self,
-            'tags': Tag.objects.all(),
-        }
+    # def get_serializer_context(self):
+    #     return {
+    #         'request': self.request,
+    #         'format': self.format_kwarg,
+    #         'view': self,
+    #         'tags': Tag.objects.all(),
+    #     }
