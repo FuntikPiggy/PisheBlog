@@ -1,0 +1,34 @@
+volumes:
+  fg_pg_data:
+#  static:
+#  media:
+
+services:
+  db:
+    image: postgres:17-alpine
+    env_file: .env
+    volumes:
+      - fg_pg_data:/var/lib/postgresql/data
+    ports:
+      - "5430:5432"
+#  backend:
+#    build: ./backend/
+#    env_file: .env
+#    depends_on:
+#      - db
+#    volumes:
+#      - static:/backend_static
+#      - media:/app/media
+#  frontend:
+#    build: ./frontend/
+#    env_file: .env
+#    command: cp -r /app/build/. /frontend_static/
+#    volumes:
+#      - static:/frontend_static
+#  gateway:
+#    build: ./nginx/
+#    ports:
+#      - 9000:80
+#    volumes:
+#      - static:/staticfiles
+#      - media:/media

@@ -64,7 +64,7 @@ class SubscriptionsSerializer(UserSerializer):
 
     def get_is_subscribed(self, user):
         return self.context[
-            'request'].user.subscriptions.filter(user.id).exists()
+            'request'].user.subscriptions.filter(id=user.id).exists()
 
     def get_recipes_count(self, user):
         return user.recipes.count()
@@ -107,8 +107,6 @@ class BaseRecipeSerializer(serializers.ModelSerializer):
 
     author = CustomUserSerializer()
     tags = TagSerializer(many=True,)
-    is_favorited = serializers.SerializerMethodField()
-    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
@@ -148,6 +146,8 @@ class RecipeOutSerializer(BaseRecipeSerializer):
     """Сериализатор вывода данных модели Recipe."""
 
     ingredients = serializers.SerializerMethodField()
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     def get_is_favorited(self, recipe):
         return self.context['request'].user in recipe.is_favorited.all()

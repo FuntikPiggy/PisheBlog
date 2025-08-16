@@ -1,3 +1,4 @@
+from django.contrib.admin.templatetags.admin_list import pagination
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
@@ -5,12 +6,13 @@ from djoser.views import UserViewSet
 from rest_framework import status, permissions, filters
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 
 from recipes.models import Tag, Ingredient, Recipe
 from .filters import RecipeFilter
+from .pagination import QueryPageNumberPagination
 from .permissions import IsAuthorOrStaffOrReadOnly
 from .serializers import TagSerializer, IngredientSerializer, RecipeInSerializer, SubscriptionsSerializer, \
     RecipeOutSerializer, CustomUserSerializer
@@ -26,17 +28,19 @@ class FgUserViewSet(UserViewSet):
     serializer_class = CustomUserSerializer
 
     @action(
-        ('get',), url_path='subscriptions',
-        detail=False#, permission_classes=(IsAuthorOrStaffOrReadOnly,)
+        ('get',),
+        url_path='subscriptions',
+        detail=False,
+        # permission_classes=(IsAuthorOrStaffOrReadOnly,),
     )
     def get_subscriptions(self, request):
         return Response(
             SubscriptionsSerializer(
                 request.user.subscriptions.all(),
                 many=True,
-                # context={'request': request}
+                context={'request': request},
             ).data,
-            status=status.HTTP_200_OK
+            # status=status.HTTP_200_OK
         )
 
     @action(
@@ -52,15 +56,17 @@ class FgUserViewSet(UserViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
-        ('post', 'delete',), url_path=r'(?P<follow_id>\d*)/subscribe',
-        detail=False#, permission_classes=(IsAuthorOrStaffOrReadOnly,)
+        ('post', 'delete',),
+        detail=True#, permission_classes=(IsAuthorOrStaffOrReadOnly,)
     )
-    def subscribe(self, request, follow_id, *args, **kwargs):
+    def subscribe(self, request, *args, **kwargs):
         if request.method == 'POST':
-            self.request.user.subscriptions.add(follow_id)
+            if self.request.user.subscriptions.filter(id=kwargs['id']).exists():
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+            self.request.user.subscriptions.add(kwargs['id'])
             return Response(status=status.HTTP_201_CREATED)
         elif request.method == 'DELETE':
-            self.request.user.subscriptions.remove(follow_id)
+            self.request.user.subscriptions.remove(kwargs['id'])
             return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -116,6 +122,24 @@ class RecipeViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+    @action(
+        ('post', 'delete',),
+        detail=True#, permission_classes=(IsAuthorOrStaffOrReadOnly,)
+    )
+    def favorite(self, request, *args, **kwargs):
+        if request.method == 'POST':
+            if self.request.user.subscriptions.filter(id=kwargs['id']).exists():
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+            self.request.user.subscriptions.add(kwargs['id'])
+            return Response(status=status.HTTP_201_CREATED)
+        elif request.method == 'DELETE':
+            self.request.user.subscriptions.remove(kwargs['id'])
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # @action()
+    # def get_link(self, request):
+
 
     # def get_serializer_context(self):
     #     return {
