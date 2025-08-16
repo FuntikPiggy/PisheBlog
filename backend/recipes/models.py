@@ -81,7 +81,6 @@ class Ingredient(models.Model):
 
     name = models.CharField(
         max_length=constants.INGREDIENT_NAME_LENGTH,
-        unique=True,
         verbose_name='Наименование',
     )
     measurement_unit = models.SlugField(
@@ -146,13 +145,13 @@ class Recipe(models.Model):
     is_favorited = models.ManyToManyField(
         User,
         through='UserFavorites',
-        related_name='favorites',
+        related_name='recipes_in_favorites',
         verbose_name='В избранном',
     )
     is_in_shopping_cart = models.ManyToManyField(
         User,
         through='UserShoppingCart',
-        related_name='shopping_cart',
+        related_name='recipes_in_cart',
         verbose_name='В списке покупок',
     )
 

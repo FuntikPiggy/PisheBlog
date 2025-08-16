@@ -35,10 +35,9 @@ class CustomUserSerializer(UserSerializer):
             'last_name', 'is_subscribed', 'avatar'
         )
 
-    def get_is_subscribed(self, obj):
-        return obj.subscriptions.filter(
-            id=self.context['request'].user.id
-        ).exists()
+    def get_is_subscribed(self, user):
+        return self.context[
+            'request'].user.subscriptions.filter(id=user.id).exists()
 
 
 class SubscriptionRecipeSerializer(serializers.ModelSerializer):
@@ -63,13 +62,12 @@ class SubscriptionsSerializer(UserSerializer):
             'is_subscribed', 'recipes', 'recipes_count', 'avatar'
         )
 
-    def get_is_subscribed(self, obj):
-        return obj.subscriptions.filter(
-            id=self.context['request'].user.id
-        ).exists()
+    def get_is_subscribed(self, user):
+        return self.context[
+            'request'].user.subscriptions.filter(user.id).exists()
 
-    def get_recipes_count(self, obj):
-        return obj.recipes.count()
+    def get_recipes_count(self, user):
+        return user.recipes.count()
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -97,6 +95,11 @@ class IngredientToRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit', 'amount',)
+
+    def validate_amount(self, amount):
+        if amount < 1:
+            raise serializers.ValidationError('Только больше 0!')
+        return amount
 
 
 class BaseRecipeSerializer(serializers.ModelSerializer):
@@ -146,15 +149,15 @@ class RecipeOutSerializer(BaseRecipeSerializer):
 
     ingredients = serializers.SerializerMethodField()
 
-    def get_is_favorited(self, obj):
-        return self.context['request'].user in obj.is_favorited.all()
+    def get_is_favorited(self, recipe):
+        return self.context['request'].user in recipe.is_favorited.all()
 
-    def get_is_in_shopping_cart(self, obj):
-        return self.context['request'].user in obj.is_in_shopping_cart.all()
+    def get_is_in_shopping_cart(self, recipe):
+        return self.context['request'].user in recipe.is_in_shopping_cart.all()
 
-    def get_ingredients(self, obj):
-        recipe_ingredients = {d.ingredient_id: d.amount for d in obj.recipeingredients.all()}
-        ingredients = obj.ingredients.all()
+    def get_ingredients(self, recipe):
+        recipe_ingredients = {d.ingredient_id: d.amount for d in recipe.recipeingredients.all()}
+        ingredients = recipe.ingredients.all()
         for ingredient in ingredients:
             ingredient.amount = recipe_ingredients[ingredient.id]
         serializer = IngredientToRecipeSerializer(ingredients, many=True)

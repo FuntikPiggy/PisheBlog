@@ -1,0 +1,58 @@
+[
+  {
+    "id": 1,
+    "name": "Бутер",
+    "text": "Бутер на завтрак, что может быть лучше! 5 минут и готово!",
+    "cooking_time": "5",
+    "author_id": "2",
+    "image": "recipes/images/buterbrod01.jpg"
+  },
+  {
+    "id": 2,
+    "name": "Булочка",
+    "text": "Вкуснейшие булочки на десерт! 1.5 часа и готово!",
+    "cooking_time": "90",
+    "author_id": "1",
+    "image": "recipes/images/bulochka01.jpg"
+  },
+  {
+    "id": 3,
+    "name": "Борщ",
+    "text": "Готовим вкуснейший борщ! 20 минут и готово!",
+    "cooking_time": "20",
+    "author_id": "1",
+    "image": "recipes/images/borsh01.jpeg"
+  },
+  {
+    "id": 4,
+    "name": "Жареная картошечка!",
+    "text": "Жарим золотистую картошечку! 15 минут и готово!",
+    "cooking_time": "15",
+    "author_id": "1",
+    "image": "recipes/images/zharennaya_kartoshka01.jpg"
+  },
+  {
+    "id": 5,
+    "name": "Уха",
+    "text": "Готовим наваристую уху! 30 минут и готово!",
+    "cooking_time": "30",
+    "author_id": "1",
+    "image": "recipes/images/uha01.jpeg"
+  },
+  {
+    "id": 6,
+    "name": "Котлетки",
+    "text": "Готовим сытные котлетки! 20 минут и готово!",
+    "cooking_time": "20",
+    "author_id": "2",
+    "image": "recipes/images/kotletki01.jpg"
+  },
+  {
+    "id": 7,
+    "name": "Пюрешечка",
+    "text": "Готовим картофельное пюре! 25 минут и готово!",
+    "cooking_time": "25",
+    "author_id": "2",
+    "image": "recipes/images/kartofelnoe_pure01.jpg"
+  }
+]

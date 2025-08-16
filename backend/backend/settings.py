@@ -23,12 +23,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework.authtoken',
     'rest_framework',
+    'rest_framework.authtoken',
+    'djoser',
     'admin_reorder',
     'django_filters',
     # 'corsheaders',
-    'djoser',
     'recipes.apps.RecipesConfig',
 ]
 
@@ -46,9 +46,9 @@ MIDDLEWARE = [
 
 # CORS_ORIGIN_ALLOW_ALL = True
 # CORS_URLS_REGEX = r'^/api/.*$'
-# CORS_ALLOWED_ORIGINS = [
-#     'http://localhost:9000',
-# ]
+# # CORS_ALLOWED_ORIGINS = [
+# #     'http://localhost:3000',
+# # ]
 
 
 ROOT_URLCONF = 'backend.urls'
@@ -126,30 +126,33 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
-    'DEFAULT_THROTTLE_RATES': {
-        'user': '10000/day',
-        'anon': '1000/day',
-    }
-}
+
+AUTH_USER_MODEL = 'recipes.FgUser'
 
 
 DJOSER = {
-    'SERIALIZERS': {'user': 'api.serializers.CustomUserSerializer',},
+    'SERIALIZERS': {'user': 'api.serializers.CustomUserSerializer',
+                    'current_user': 'api.serializers.CustomUserSerializer',},
     'HIDE_USERS': False,
     # 'USER_ID_FIELD': 'id',
     # 'LOGIN_FIELD': 'email',
 }
 
-AUTH_USER_MODEL = 'recipes.FgUser'
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny'
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'api.pagination.QueryPageNumberPagination',
+    # 'PAGE_SIZE': 7,
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '10000/day',
+        'anon': '1000/day',
+    }
+}
 
 
 ADMIN_REORDER = (

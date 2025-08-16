@@ -1,32 +1,123 @@
 [
   {
-    "name": "Борщ",
-    "text": "Готовим вкуснейший борщ! 20 минут и готово!",
-    "cooking_time": "20",
-    "author_id": "1"
+    "ingredient_id": 556,
+    "recipe_id": 3,
+    "amount": 200
   },
   {
-    "name": "Жареная картошечка!",
-    "text": "Жарим золотистую картошечку! 15 минут и готово!",
-    "cooking_time": "15",
-    "author_id": "1"
+    "ingredient_id": 556,
+    "recipe_id": 4,
+    "amount": 300
   },
   {
-    "name": "Уха",
-    "text": "Готовим наваристую уху! 30 минут и готово!",
-    "cooking_time": "30",
-    "author_id": "1"
+    "ingredient_id": 556,
+    "recipe_id": 5,
+    "amount": 200
   },
   {
-    "name": "Котлетки",
-    "text": "Готовим сытные котлетки! 20 минут и готово!",
-    "cooking_time": "20",
-    "author_id": "2"
+    "ingredient_id": 556,
+    "recipe_id": 7,
+    "amount": 400
   },
   {
-    "name": "Пюрешечка",
-    "text": "Готовим картофельное пюре! 25 минут и готово!",
-    "cooking_time": "25",
-    "author_id": "2"
+    "ingredient_id": 520,
+    "recipe_id": 3,
+    "amount": 100
+  },
+  {
+    "ingredient_id": 252,
+    "recipe_id": 3,
+    "amount": 2000
+  },
+  {
+    "ingredient_id": 252,
+    "recipe_id": 5,
+    "amount": 2000
+  },
+  {
+    "ingredient_id": 278,
+    "recipe_id": 3,
+    "amount": 500
+  },
+  {
+    "ingredient_id": 278,
+    "recipe_id": 6,
+    "amount": 400
+  },
+  {
+    "ingredient_id": 1567,
+    "recipe_id": 3,
+    "amount": 300
+  },
+  {
+    "ingredient_id": 1684,
+    "recipe_id": 3,
+    "amount": 30
+  },
+  {
+    "ingredient_id": 1684,
+    "recipe_id": 4,
+    "amount": 30
+  },
+  {
+    "ingredient_id": 1684,
+    "recipe_id": 5,
+    "amount": 40
+  },
+  {
+    "ingredient_id": 1684,
+    "recipe_id": 6,
+    "amount": 30
+  },
+  {
+    "ingredient_id": 1684,
+    "recipe_id": 7,
+    "amount": 30
+  },
+  {
+    "ingredient_id": 1988,
+    "recipe_id": 1,
+    "amount": 50
+  },
+  {
+    "ingredient_id": 1782,
+    "recipe_id": 1,
+    "amount": 20
+  },
+  {
+    "ingredient_id": 654,
+    "recipe_id": 1,
+    "amount": 30
+  },
+  {
+    "ingredient_id": 899,
+    "recipe_id": 1,
+    "amount": 10
+  },
+
+  {
+    "ingredient_id": 1398,
+    "recipe_id": 2,
+    "amount": 200
+  },
+  {
+    "ingredient_id": 2180,
+    "recipe_id": 2,
+    "amount": 3
+  },
+  {
+    "ingredient_id": 252,
+    "recipe_id": 2,
+    "amount": 100
+  },
+  {
+    "ingredient_id": 1684,
+    "recipe_id": 2,
+    "amount": 10
+  },
+  {
+    "ingredient_id": 1546,
+    "recipe_id": 2,
+    "amount": 50
   }
 ]

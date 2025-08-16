@@ -1,77 +1,30 @@
 [
   {
-    "ingredient_id": 556,
-    "recipe_id": 1,
-    "amount": 200
+    "tag_id": 1,
+    "recipe_id": 1
   },
   {
-    "ingredient_id": 556,
-    "recipe_id": 2,
-    "amount": 300
+    "tag_id": 4,
+    "recipe_id": 2
   },
   {
-    "ingredient_id": 556,
-    "recipe_id": 3,
-    "amount": 200
+    "tag_id": 2,
+    "recipe_id": 3
   },
   {
-    "ingredient_id": 556,
-    "recipe_id": 5,
-    "amount": 400
+    "tag_id": 2,
+    "recipe_id": 5
   },
   {
-    "ingredient_id": 520,
-    "recipe_id": 1,
-    "amount": 100
+    "tag_id": 3,
+    "recipe_id": 4
   },
   {
-    "ingredient_id": 252,
-    "recipe_id": 1,
-    "amount": 2000
+    "tag_id": 3,
+    "recipe_id": 6
   },
   {
-    "ingredient_id": 252,
-    "recipe_id": 3,
-    "amount": 2000
-  },
-  {
-    "ingredient_id": 278,
-    "recipe_id": 1,
-    "amount": 500
-  },
-  {
-    "ingredient_id": 278,
-    "recipe_id": 4,
-    "amount": 400
-  },
-  {
-    "ingredient_id": 1567,
-    "recipe_id": 1,
-    "amount": 300
-  },
-  {
-    "ingredient_id": 1684,
-    "recipe_id": 1,
-    "amount": 30
-  },
-  {
-    "ingredient_id": 1684,
-    "recipe_id": 2,
-    "amount": 30
-  },
-  {
-    "ingredient_id": 1684,
-    "recipe_id": 3,
-    "amount": 40
-  },
-  {
-    "ingredient_id": 1684,
-    "recipe_id": 4,
-    "amount": 30
-  },
-  {
-    "ingredient_id": 1684,
-    "recipe_id": 5,
-    "amount": 30
+    "tag_id": 3,
+    "recipe_id": 7
   }
 ]
