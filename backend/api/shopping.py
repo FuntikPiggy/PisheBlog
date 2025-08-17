@@ -7,8 +7,8 @@ from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
-from .constants import (FONT_REG, FONT_MED, ROWS_PER_PAGE,
-                        BIG_FONT, SMALL_FONT, PAGE_FONT)
+from .constants import (FONT_REG, FONT_MED, BIG_FONT, SMALL_FONT,
+                        PAGE_FONT, ROWS_PER_PAGE, ROW_STEP)
 
 basedir = os.path.dirname(os.path.abspath(__file__)) + '\\static\\api\\'
 pdfmetrics.registerFont(TTFont(FONT_MED, basedir + f'fonts\\{FONT_MED}.ttf'))
@@ -27,9 +27,9 @@ def save_shopping_file(ingredients):
         x, y = 70, 770
         cart_file.drawString(x, y, f'Список покупок из{' ' * 26}:')
         cart_file.setFont(FONT_REG, SMALL_FONT)
-        y -= 25
+        y -= ROW_STEP
         for name, amount in ingredients_on_page:
-            y -= 23
+            y -= ROW_STEP
             cart_file.drawString(x, y, f'● {name}')
             cart_file.drawString(430, y, f'{amount}')
         cart_file.drawInlineImage(image, 317, 767, width=120, height=35)
