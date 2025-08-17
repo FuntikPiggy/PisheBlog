@@ -1,11 +1,17 @@
-from django_filters import rest_framework as filters
+from django.contrib.auth import get_user_model
+from django_filters import rest_framework as filters, ModelChoiceFilter
 
 from recipes.models import Recipe
 
 
+User = get_user_model()
+
+
 class RecipeFilter(filters.FilterSet):
-    tags = filters.AllValuesMultipleFilter(field_name='tags__slug', lookup_expr='contains')
+    tags = filters.AllValuesMultipleFilter(field_name='tags__slug', lookup_expr='contains',)
+    is_favorited = ModelChoiceFilter(queryset=User.objects.all(), field_name='fans',)
+    is_in_shopping_cart = ModelChoiceFilter(queryset=User.objects.all(), field_name='buyers',)
 
     class Meta:
         model = Recipe
-        fields = ['author', 'is_favorited', 'is_in_shopping_cart',]
+        fields = ('author',)

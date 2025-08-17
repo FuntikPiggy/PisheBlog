@@ -45,7 +45,7 @@ class Command(BaseCommand):
             db_path = BASE_DIR / '*.sqlite3'
             # Создаём путь к файлу БД (в виде строки)
             db_file = glob('\\'.join(db_path.parts))[0]
-            con = sqlite3.connect(self.db_file)
+            con = sqlite3.connect(db_file)
             # Создаём объект указателя
             cur = con.cursor()
             # Делаем запрос имён всех таблиц

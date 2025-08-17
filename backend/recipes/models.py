@@ -34,6 +34,18 @@ class FgUser(AbstractUser):
         related_name='followers',
         verbose_name='Подписки',
     )
+    favorites = models.ManyToManyField(
+        'Recipe',
+        through='UserFavorites',
+        related_name='fans',
+        verbose_name='В избранном',
+    )
+    shopping_cart = models.ManyToManyField(
+        'Recipe',
+        through='UserShoppingCart',
+        related_name='buyers',
+        verbose_name='В списке покупок',
+    )
 
     class Meta:
         verbose_name = 'пользователь'
@@ -142,18 +154,6 @@ class Recipe(models.Model):
         through='RecipeTag',
         verbose_name='Тэги',
     )
-    is_favorited = models.ManyToManyField(
-        User,
-        through='UserFavorites',
-        related_name='recipes_in_favorites',
-        verbose_name='В избранном',
-    )
-    is_in_shopping_cart = models.ManyToManyField(
-        User,
-        through='UserShoppingCart',
-        related_name='recipes_in_cart',
-        verbose_name='В списке покупок',
-    )
 
     class Meta:
         verbose_name = 'рецепт'
@@ -191,7 +191,7 @@ class RecipeIngredient(models.Model):
 
 class UserFavorites(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,)# related_name='favorited_by')
 
     def __str__(self):
         return (f'{self.user.username[:32]=} '
@@ -200,7 +200,7 @@ class UserFavorites(models.Model):
 
 class UserShoppingCart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,)# related_name='carted_by')
 
     def __str__(self):
         return (f'{self.user.username[:32]=} '
