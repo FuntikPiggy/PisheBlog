@@ -100,19 +100,31 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit',)
 
 
+# class MeasureSerializer(serializers.ModelSerializer):
+#     """Класс поля количества ингредиента."""
+#
+#     def to_internal_value(self, data):
+#         if not isinstance(data, int) or data < 1:
+#             raise serializers.ValidationError('Количество должно быть целым числом > 0')
+#         format, imgstr = data.split(';base64,')
+#         ext = format.split('/')[-1]
+#         data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+#         return super().to_internal_value(data)
+
+
+
 class IngredientToRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор данных модели Ingredient для Recipe."""
 
-    amount = serializers.IntegerField()
+    amount = serializers.SerializerMethodField()
 
     class Meta:
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit', 'amount',)
+        read_only_fields = ('id', 'name', 'measurement_unit', 'amount',)
 
-    def validate_amount(self, amount):
-        if amount < 1:
-            raise serializers.ValidationError('Только больше 0!')
-        return amount
+    def get_amount(self, ingredient):
+        return ingredient.recipeingredients.amount
 
 
 class BaseRecipeSerializer(serializers.ModelSerializer):
@@ -161,7 +173,7 @@ class RecipeInSerializer(BaseRecipeSerializer):
             )
         return recipe
 
-    def update(self, instance, validated_data):
+    def update(self, validated_data):
         tags_statuses = validated_data.pop('tags')
         ingredients_statuses = validated_data.pop('ingredients')
         recipe = Recipe.objects.create(**validated_data)

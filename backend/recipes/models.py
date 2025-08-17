@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import ForeignKey
+from django.urls import reverse
 
 from . import constants
 
@@ -165,6 +166,9 @@ class Recipe(models.Model):
         return (f'{self.name[:32]=} '
                 f'{self.ingredients.__str__()=}'
                 f'{self.tags.__str__()=}')
+
+    def get_absolute_url(self):
+        return reverse('api:recipe-detail', args=(self.id,))
 
 
 class RecipeTag(models.Model):

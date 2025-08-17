@@ -2,12 +2,15 @@ from functools import wraps
 
 from django.contrib.auth import get_user_model
 from django.db.models import F
+from django.shortcuts import redirect
+from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from rest_framework import status, permissions, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
+import short_url
 
 from recipes.models import Tag, Ingredient, Recipe
 from .filters import RecipeFilter
@@ -168,16 +171,18 @@ class RecipeViewSet(ModelViewSet):
         ]
         return save_shopping_file(sorted(ingredients))
 
+    @action(('get',), url_path='get-link', detail=True, permission_classes=(permissions.AllowAny,),)
+    def get_link(self, request, *args, **kwargs):
+        """Метод получения короткой ссылки."""
+        return Response(
+            {'short-link':f'http://{request.get_host()}/s/{short_url.encode_url(int(kwargs['id']), min_length=3)}'},
+            status=status.HTTP_200_OK
+        )
 
 
-    # @action()
-    # def get_link(self, request):
-
-
-    # def get_serializer_context(self):
-    #     return {
-    #         'request': self.request,
-    #         'format': self.format_kwarg,
-    #         'view': self,
-    #         'tags': Tag.objects.all(),
-    #     }
+def short_link_decode(request, shorturl):
+    """Функция представления для декодирования коротких ссылок."""
+    a = short_url.decode_url(shorturl)
+    return redirect(
+        f'http://{request.get_host()}/{reverse('api:recipe-detail', kwargs={'id':short_url.decode_url(shorturl),},)}'
+        )
