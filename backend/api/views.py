@@ -1,15 +1,11 @@
 from functools import wraps
 
-from django.contrib.admin.templatetags.admin_list import pagination
 from django.contrib.auth import get_user_model
-from django.db.models import Value, F
+from django.db.models import F
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-
 from rest_framework import status, permissions, filters
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 
@@ -20,6 +16,7 @@ from .permissions import IsAuthorOrStaffOrReadOnly
 from .serializers import (TagSerializer, IngredientSerializer,
                           RecipeInSerializer, SubscriptionsSerializer,
                           RecipeOutSerializer, CustomUserSerializer)
+from .shopping import save_shopping_file
 
 User = get_user_model()
 
@@ -152,14 +149,25 @@ class RecipeViewSet(ModelViewSet):
         ingredients = dict()
         all_ingrediens = list(
             request.user.shopping_cart.prefetch_related(
-                'ingredients', 'recipeingredients'
-            ).values('ingredients__name', 'recipeingredients__amount').values(
-                name=F('ingredients__name'), amount=F('recipeingredients__amount')
+                'ingredients', 'recipeingredients').values(
+                'ingredients__name',
+                'recipeingredients__amount',
+                'ingredients__measurement_unit'
+            ).values(
+                name=F('ingredients__name'),
+                amount=F('recipeingredients__amount'),
+                m_unit=F('ingredients__measurement_unit'),
             )
         )
         for ingredient in all_ingrediens:
-            ingredients.setdefault(ingredient['name'], []).append(ingredient['amount'])
-        return request.user.shopping_cart
+            ingredients.setdefault(
+                (ingredient['name'], ingredient['m_unit']), []
+            ).append(ingredient['amount'])
+        ingredients = [
+            (k[0], f'{sum(v)} {k[1]}') for k, v in sorted(ingredients.items())
+        ]
+        return save_shopping_file(sorted(ingredients))
+
 
 
     # @action()
