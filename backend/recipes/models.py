@@ -142,6 +142,7 @@ class Recipe(models.Model):
     image = models.ImageField(
         upload_to='recipes/images/',
         null=True,
+
         default=None,
         verbose_name='Изображение',
     )
@@ -155,11 +156,15 @@ class Recipe(models.Model):
         through='RecipeTag',
         verbose_name='Тэги',
     )
+    pub_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата публикации',
+    )
 
     class Meta:
         verbose_name = 'рецепт'
         verbose_name_plural = 'Рецепты'
-        ordering = ('name',)
+        ordering = ('-pub_date',)
         default_related_name = 'recipes'
 
     def __str__(self):
@@ -174,6 +179,9 @@ class Recipe(models.Model):
 class RecipeTag(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+
+    class Meta:
+        default_related_name = 'recipetags'
 
     def __str__(self):
         return (f'{self.recipe.name[:32]=} '

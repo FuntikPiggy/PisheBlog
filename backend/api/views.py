@@ -6,16 +6,17 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from rest_framework import status, permissions, filters
+from rest_framework import status, filters
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 import short_url
 
 from recipes.models import Tag, Ingredient, Recipe
-from .filters import RecipeFilter
+from .filters import RecipeFilter, IngredientFilter
 from .pagination import QueryPageNumberPagination, paginated
-from .permissions import IsAuthorOrStaffOrReadOnly
+from .permissions import IsAuthorOrStaff, SelfOrStaffOrReadOnly
 from .serializers import (TagSerializer, IngredientSerializer,
                           RecipeInSerializer, SubscriptionsSerializer,
                           RecipeOutSerializer, CustomUserSerializer)
@@ -45,12 +46,12 @@ class FgUserViewSet(UserViewSet):
     """Представление модели пользователя."""
 
     http_method_names = ('get', 'post', 'put', 'delete',)
-    permission_classes = (IsAuthorOrStaffOrReadOnly,)
     serializer_class = CustomUserSerializer
     pagination_class = QueryPageNumberPagination
+    permission_classes = (IsAuthenticated, SelfOrStaffOrReadOnly,)
 
     @paginated
-    @action(('get',), detail=False, permission_classes=(permissions.AllowAny,),)
+    @action(('get',), detail=False, permission_classes=(IsAuthenticated,),)
     def subscriptions(self, request):
         """Метод просмотра подписок."""
         return SubscriptionsSerializer(
@@ -59,7 +60,10 @@ class FgUserViewSet(UserViewSet):
             context={'request': request},
         ).data
 
-    @action(('put', 'delete'), url_path='me/avatar', detail=False, permission_classes=(permissions.AllowAny,),)
+    @action(
+        ('put', 'delete'), url_path='me/avatar',
+        detail=False, permission_classes=(IsAuthorOrStaff,),
+    )
     def avatar(self, request, *args, **kwargs):
         """Метод добавления и удаления аватара."""
         self.get_object = self.get_instance
@@ -70,7 +74,7 @@ class FgUserViewSet(UserViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @manytomany_setter_deleter
-    @action(('post', 'delete',), detail=True, permission_classes=(permissions.AllowAny,),)
+    @action(('post', 'delete',), detail=True, permission_classes=(IsAuthenticated,),)
     def subscribe(self, request, *args, **kwargs):
         """Метод подписки."""
         return request.user.subscriptions
@@ -81,7 +85,7 @@ class TagViewSet(ReadOnlyModelViewSet):
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = None
 
     # def get_queryset(self):
@@ -93,9 +97,11 @@ class IngredientViewSet(ReadOnlyModelViewSet):
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
-    filter_backends = (filters.SearchFilter,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend,)
+    filterset_class = IngredientFilter
     search_fields = ('^name',)
+    # filterset_fields = ('name',)
     pagination_class = None
 
 
@@ -103,13 +109,14 @@ class RecipeViewSet(ModelViewSet):
     """Представление модели рецепта."""
 
     http_method_names = ('get', 'post', 'patch', 'delete',)
-    permission_classes = (permissions.AllowAny,)
-    # queryset = Recipe.objects.prefetch_related(Prefetch('ingredients_amount', queryset=RecipeIngredient.objects.all()))
-    queryset = Recipe.objects.all()#.prefetch_related('ingredients', 'recipeingredients')
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrStaff,)
+    queryset = Recipe.objects.all().prefetch_related(
+        'ingredients', 'recipeingredients', 'tags', 'author')
     serializer_class = RecipeInSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     lookup_url_kwarg = 'id'
+
 
     # def get_serializer_context(self):
     #     context = super().get_serializer_context()
@@ -123,7 +130,7 @@ class RecipeViewSet(ModelViewSet):
     #     queryset = list(Recipe.objects.prefetch_related(Prefetch('ingredients_amount', queryset=RecipeIngredient.objects.all())))
     #     return queryset
 
-    def get_serializer_class(self):
+    def get_serializer_class(self, *args, **kwargs):
         if self.action in ('create', 'partial_update'):
             return self.serializer_class
         return RecipeOutSerializer
@@ -135,18 +142,18 @@ class RecipeViewSet(ModelViewSet):
         serializer.save(author=self.request.user)
 
     @manytomany_setter_deleter
-    @action(('post', 'delete',), detail=True, permission_classes=(permissions.AllowAny,),)
+    @action(('post', 'delete',), detail=True, permission_classes=(IsAuthenticated,),)
     def favorite(self, request, *args, **kwargs):
         """Метод добавления в избранное."""
         return request.user.favorites
 
     @manytomany_setter_deleter
-    @action(('post', 'delete',), detail=True, permission_classes=(permissions.AllowAny,),)
+    @action(('post', 'delete',), detail=True, permission_classes=(IsAuthenticated,),)
     def shopping_cart(self, request, *args, **kwargs):
         """Метод добавления в корзину покупок."""
         return request.user.shopping_cart
 
-    @action(('get',), detail=False, permission_classes=(permissions.AllowAny,),)
+    @action(('get',), detail=False, permission_classes=(IsAuthenticated,),)
     def download_shopping_cart(self, request, *args, **kwargs):
         """Метод вывода списка покупок в файл."""
         ingredients = dict()
@@ -171,7 +178,7 @@ class RecipeViewSet(ModelViewSet):
         ]
         return save_shopping_file(sorted(ingredients))
 
-    @action(('get',), url_path='get-link', detail=True, permission_classes=(permissions.AllowAny,),)
+    @action(('get',), url_path='get-link', detail=True, permission_classes=(AllowAny,),)
     def get_link(self, request, *args, **kwargs):
         """Метод получения короткой ссылки."""
         return Response(
