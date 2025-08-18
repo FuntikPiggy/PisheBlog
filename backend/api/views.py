@@ -19,7 +19,8 @@ from .pagination import QueryPageNumberPagination, paginated
 from .permissions import IsAuthorOrStaff, SelfOrStaffOrReadOnly
 from .serializers import (TagSerializer, IngredientSerializer,
                           RecipeInSerializer, SubscriptionsSerializer,
-                          RecipeOutSerializer, CustomUserSerializer)
+                          RecipeOutSerializer, CustomUserSerializer,
+                          SubscriptionRecipeSerializer)
 from .shopping import save_shopping_file
 
 User = get_user_model()
@@ -30,12 +31,16 @@ def manytomany_setter_deleter(func):
     добавления в избранное и в корзину покупок."""
     @wraps(func)
     def wrapper(self, request, **kwargs):
-        queryset = func(self, request, **kwargs)
+        queryset, serializer_class = func(self, request, **kwargs)
         if request.method == 'POST':
             if queryset.filter(id=kwargs['id']).exists():
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             queryset.add(kwargs['id'])
-            return Response(status=status.HTTP_201_CREATED)
+            return Response(
+                serializer_class(queryset.get(id=kwargs['id']),
+                context={'request': request},).data,
+                status=status.HTTP_201_CREATED
+            )
         elif request.method == 'DELETE':
             queryset.remove(kwargs['id'])
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -77,7 +82,7 @@ class FgUserViewSet(UserViewSet):
     @action(('post', 'delete',), detail=True, permission_classes=(IsAuthenticated,),)
     def subscribe(self, request, *args, **kwargs):
         """Метод подписки."""
-        return request.user.subscriptions
+        return request.user.subscriptions, SubscriptionsSerializer#self.get_serializer_class()
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -112,7 +117,7 @@ class RecipeViewSet(ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrStaff,)
     queryset = Recipe.objects.all().prefetch_related(
         'ingredients', 'recipeingredients', 'tags', 'author')
-    serializer_class = RecipeInSerializer
+    serializer_class = RecipeOutSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     lookup_url_kwarg = 'id'
@@ -132,8 +137,8 @@ class RecipeViewSet(ModelViewSet):
 
     def get_serializer_class(self, *args, **kwargs):
         if self.action in ('create', 'partial_update'):
-            return self.serializer_class
-        return RecipeOutSerializer
+            return RecipeInSerializer
+        return self.serializer_class
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -145,13 +150,13 @@ class RecipeViewSet(ModelViewSet):
     @action(('post', 'delete',), detail=True, permission_classes=(IsAuthenticated,),)
     def favorite(self, request, *args, **kwargs):
         """Метод добавления в избранное."""
-        return request.user.favorites
+        return request.user.favorites, SubscriptionRecipeSerializer
 
     @manytomany_setter_deleter
     @action(('post', 'delete',), detail=True, permission_classes=(IsAuthenticated,),)
     def shopping_cart(self, request, *args, **kwargs):
         """Метод добавления в корзину покупок."""
-        return request.user.shopping_cart
+        return request.user.shopping_cart, SubscriptionRecipeSerializer
 
     @action(('get',), detail=False, permission_classes=(IsAuthenticated,),)
     def download_shopping_cart(self, request, *args, **kwargs):

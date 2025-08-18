@@ -14,8 +14,8 @@ User = get_user_model()
 
 
 def manytomany_setter_deleter(func):
-    """Декоратор для методов, связанных с
-    кастомными полями пользователей."""
+    """Декоратор для методов получения значений для полей
+    is_subscribed, is_favorited и is_in_shopping_cart."""
     @wraps(func)
     def wrapper(self, obj):
         if self.context['request'].user.is_authenticated:
@@ -224,8 +224,8 @@ class RecipeOutSerializer(BaseRecipeSerializer):
         fields = ('id', 'tags', 'author', 'ingredients',
                   'is_favorited','is_in_shopping_cart',
                   'name', 'image', 'text', 'cooking_time',)
-        # read_only_fields = ('id', 'author', 'ingredients', 'tags',
-        #                     'is_favorited', 'is_in_shopping_cart',)
+        read_only_fields = ('id', 'author', 'ingredients', 'tags',
+                            'is_favorited', 'is_in_shopping_cart',)
 
     def get_ingredients(self, recipe):
         recipe_ingredients = {d.ingredient_id: d.amount for d in recipe.recipeingredients.all()}
