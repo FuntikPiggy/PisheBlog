@@ -144,7 +144,11 @@ class RecipeViewSet(ModelViewSet):
         serializer.save(author=self.request.user)
 
     def perform_update(self, serializer):
-        serializer.save(author=self.request.user)
+        serializer.save(
+            author=self.request.user,
+            tags=self.request.data.get('tags', []),
+            ingredients=self.request.data.get('ingredients', []),
+        )
 
     @manytomany_setter_deleter
     @action(('post', 'delete',), detail=True, permission_classes=(IsAuthenticated,),)
