@@ -14,7 +14,7 @@ class Command(BaseCommand):
     help = 'Импорт данных из csv-файлов в БД'
 
     # Оформляем путь до файлов json (в формате специального объекта)
-    json_path = BASE_DIR.parent / 'data/*.json'
+    json_path = BASE_DIR / 'data/*.json'
     # Создаём список путей к файлам csv (в виде строк)
     json_files = glob('\\'.join(json_path.parts))
 
