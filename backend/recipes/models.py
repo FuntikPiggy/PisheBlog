@@ -16,7 +16,7 @@ class FgUser(AbstractUser):
         max_length=constants.USERNAME_LENGTH,
         unique=True,
         verbose_name='Псевдоним',
-        help_text=f'Используются только буквы, цифры и символы @/./+/-/_ .',
+        help_text='Используются только буквы, цифры и символы @/./+/-/_ .',
     )
     email = models.EmailField(
         max_length=constants.EMAIL_LENGTH,
@@ -118,7 +118,7 @@ class CookingTimeField(models.PositiveSmallIntegerField):
         return super(
             models.PositiveSmallIntegerField,
             self
-        ).formfield(**{"min_value": 1, **kwargs,})
+        ).formfield(**{"min_value": 1, **kwargs, })
 
 
 class Recipe(models.Model):
@@ -137,7 +137,7 @@ class Recipe(models.Model):
     author = ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name = 'Автор',
+        verbose_name='Автор',
     )
     image = models.ImageField(
         upload_to='recipes/images/',
@@ -203,7 +203,7 @@ class RecipeIngredient(models.Model):
 
 class UserFavorites(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,)# related_name='favorited_by')
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,)
 
     def __str__(self):
         return (f'{self.user.username[:32]=} '
@@ -212,7 +212,7 @@ class UserFavorites(models.Model):
 
 class UserShoppingCart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,)# related_name='carted_by')
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,)
 
     def __str__(self):
         return (f'{self.user.username[:32]=} '

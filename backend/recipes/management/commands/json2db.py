@@ -1,12 +1,10 @@
-import os
 from glob import glob
-from sqlite3 import IntegrityError
-import csv
 import json
+import os
 import sqlite3
 
-import psycopg2
 from django.core.management.base import BaseCommand
+import psycopg2
 
 from backend.settings import BASE_DIR
 
@@ -17,14 +15,12 @@ class Command(BaseCommand):
 
     # Оформляем путь до файлов json (в формате специального объекта)
     json_path = BASE_DIR.parent / 'data/*.json'
-    # # Оформляем путь до БД (в формате специального объекта)
-    # db_path = BASE_DIR / '*.sqlite3'
     # Создаём список путей к файлам csv (в виде строк)
     json_files = glob('\\'.join(json_path.parts))
-    # # Создаём путь к файлу БД (в виде строки)
-    # db_file = glob('\\'.join(db_path.parts))[0]
+
     def handle(self, *args, **options):
-        DBT = os.getenv('DB_PROD_TYPE', False) == 'True'  # DBT - DateBaseType, True - Postgres, False - SqLite
+        # DBT - DateBaseType, True - Postgres, False - SqLite
+        DBT = os.getenv('DB_PROD_TYPE', False) == 'True'
         # Создаём объект БД (подключаемся к базе данных)
         if DBT:
             con = psycopg2.connect(
@@ -76,14 +72,15 @@ class Command(BaseCommand):
                         sql_command = (f'INSERT INTO {table} ('
                                        f'{', '.join(json_clmns)}'
                                        f') VALUES ('
-                                       f'{', '.join(['?', '%s'][DBT] for _ in json_clmns)}'
+                                       f'{', '.join(['?', '%s'][DBT]
+                                                    for _ in json_clmns)}'
                                        f');')
                         try:
                             # Производим вставку значений,
                             # полученных из файла css в БД
                             cur.executemany(f'{sql_command}', to_db)
                             print(f'Таблица {table} обновлена!\n')
-                        except IntegrityError as e:
+                        except sqlite3.IntegrityError as e:
                             print(f'В таблице {table} данные не обновлены\n'
                                   f'в связи с возникшей ошибкой:\n*** {e}\n')
                         break

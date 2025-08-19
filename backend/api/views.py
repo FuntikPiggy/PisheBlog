@@ -8,10 +8,11 @@ from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from rest_framework import status, filters
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly, AllowAny)
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
-import short_url
+from short_url import encode_url, decode_url
 
 from recipes.models import Tag, Ingredient, Recipe
 from .filters import RecipeFilter, IngredientFilter
@@ -38,8 +39,8 @@ def manytomany_setter_deleter(func):
             queryset.add(kwargs['id'])
             return Response(
                 serializer_class(queryset.get(id=kwargs['id']),
-                context={'request': request},).data,
-                status=status.HTTP_201_CREATED
+                                 context={'request': request},).data,
+                status=status.HTTP_201_CREATED,
             )
         elif request.method == 'DELETE':
             queryset.remove(kwargs['id'])
@@ -59,11 +60,9 @@ class FgUserViewSet(UserViewSet):
     @action(('get',), detail=False, permission_classes=(IsAuthenticated,),)
     def subscriptions(self, request):
         """Метод просмотра подписок."""
-        return SubscriptionsSerializer(
-            request.user.subscriptions.all(),
-            many=True,
-            context={'request': request},
-        ).data
+        return SubscriptionsSerializer(request.user.subscriptions.all(),
+                                       many=True, context={'request': request},
+                                       ).data
 
     @action(
         ('put', 'delete'), url_path='me/avatar',
@@ -79,10 +78,11 @@ class FgUserViewSet(UserViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @manytomany_setter_deleter
-    @action(('post', 'delete',), detail=True, permission_classes=(IsAuthenticated,),)
+    @action(('post', 'delete',), detail=True,
+            permission_classes=(IsAuthenticated,),)
     def subscribe(self, request, *args, **kwargs):
         """Метод подписки."""
-        return request.user.subscriptions, SubscriptionsSerializer#self.get_serializer_class()
+        return request.user.subscriptions, SubscriptionsSerializer
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -92,9 +92,6 @@ class TagViewSet(ReadOnlyModelViewSet):
     serializer_class = TagSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = None
-
-    # def get_queryset(self):
-    #     return Tag.objects.filter(recipes__isnull=False).distinct()
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
@@ -106,7 +103,6 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     filter_backends = (filters.SearchFilter, DjangoFilterBackend,)
     filterset_class = IngredientFilter
     search_fields = ('^name',)
-    # filterset_fields = ('name',)
     pagination_class = None
 
 
@@ -121,19 +117,6 @@ class RecipeViewSet(ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     lookup_url_kwarg = 'id'
-
-
-    # def get_serializer_context(self):
-    #     context = super().get_serializer_context()
-    #     if self.action in ('create', 'partial_update'):
-    #         return context
-    #     context.update({'queryset': self.queryset})
-    #     return context
-
-    # def get_queryset(self):
-    #     # queryset = list(RecipeIngredient.objects.all().select_related('recipe', 'ingredient'))
-    #     queryset = list(Recipe.objects.prefetch_related(Prefetch('ingredients_amount', queryset=RecipeIngredient.objects.all())))
-    #     return queryset
 
     def get_serializer_class(self, *args, **kwargs):
         if self.action in ('create', 'partial_update'):
@@ -151,54 +134,55 @@ class RecipeViewSet(ModelViewSet):
         )
 
     @manytomany_setter_deleter
-    @action(('post', 'delete',), detail=True, permission_classes=(IsAuthenticated,),)
+    @action(('post', 'delete',), detail=True,
+            permission_classes=(IsAuthenticated,),)
     def favorite(self, request, *args, **kwargs):
         """Метод добавления в избранное."""
         return request.user.favorites, SubscriptionRecipeSerializer
 
     @manytomany_setter_deleter
-    @action(('post', 'delete',), detail=True, permission_classes=(IsAuthenticated,),)
+    @action(('post', 'delete',), detail=True,
+            permission_classes=(IsAuthenticated,),)
     def shopping_cart(self, request, *args, **kwargs):
         """Метод добавления в корзину покупок."""
         return request.user.shopping_cart, SubscriptionRecipeSerializer
 
-    @action(('get',), detail=False, permission_classes=(IsAuthenticated,),)
+    @action(('get',), detail=False,
+            permission_classes=(IsAuthenticated,),)
     def download_shopping_cart(self, request, *args, **kwargs):
         """Метод вывода списка покупок в файл."""
-        ingredients = dict()
-        all_ingrediens = list(
-            request.user.shopping_cart.prefetch_related(
-                'ingredients', 'recipeingredients').values(
-                'ingredients__name',
-                'recipeingredients__amount',
-                'ingredients__measurement_unit'
-            ).values(
-                name=F('ingredients__name'),
-                amount=F('recipeingredients__amount'),
-                m_unit=F('ingredients__measurement_unit'),
-            )
+        all_ingredients = request.user.shopping_cart.prefetch_related(
+            'ingredients', 'recipeingredients').values(
+            ing_name=F('ingredients__name'),
+            ing_amount=F('recipeingredients__amount'),
+            ing_m_unit=F('ingredients__measurement_unit')
         )
-        for ingredient in all_ingrediens:
+        ingredients = dict()
+        for ingredient in all_ingredients:
             ingredients.setdefault(
-                (ingredient['name'], ingredient['m_unit']), []
-            ).append(ingredient['amount'])
+                (ingredient['ing_name'], ingredient['ing_m_unit']), []
+            ).append(ingredient['ing_amount'])
         ingredients = [
-            (k[0], f'{sum(v)} {k[1]}') for k, v in sorted(ingredients.items())
+            (k[0], f'{sum(v)} {k[1]}') for k, v in ingredients.items()
         ]
-        return save_shopping_file(sorted(ingredients))
+        return save_shopping_file(ingredients)
 
-    @action(('get',), url_path='get-link', detail=True, permission_classes=(AllowAny,),)
+    @action(('get',), url_path='get-link',
+            detail=True, permission_classes=(AllowAny,),)
     def get_link(self, request, *args, **kwargs):
         """Метод получения короткой ссылки."""
         return Response(
-            {'short-link':f'http://{request.get_host()}/s/{short_url.encode_url(int(kwargs['id']), min_length=3)}'},
-            status=status.HTTP_200_OK
+            {'short-link': f'https://{request.get_host()}'
+                           f'/s/{encode_url(int(kwargs['id']))}'},
+            status=status.HTTP_200_OK,
         )
 
 
 def short_link_decode(request, shorturl):
     """Функция представления для декодирования коротких ссылок."""
-    a = short_url.decode_url(shorturl)
     return redirect(
-        f'http://{request.get_host()}/{reverse('api:recipe-detail', kwargs={'id':short_url.decode_url(shorturl),},)}'
-        )
+        f'http://{request.get_host()}/{reverse(
+            'api:recipe-detail',
+            kwargs={'id': decode_url(shorturl), },
+        )}'
+    )

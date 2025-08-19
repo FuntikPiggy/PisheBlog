@@ -1,5 +1,5 @@
+# flake8: noqa
 import os
-from datetime import timedelta
 from pathlib import Path
 
 from django.contrib.auth import get_user_model
@@ -29,14 +29,12 @@ INSTALLED_APPS = [
     'djoser',
     'admin_reorder',
     'django_filters',
-    # 'corsheaders',
     'recipes.apps.RecipesConfig',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    # 'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -49,12 +47,6 @@ MIDDLEWARE = [
 INTERNAL_IPS = [
     '127.0.0.1',
 ]
-
-# CORS_ORIGIN_ALLOW_ALL = True
-# CORS_URLS_REGEX = r'^/api/.*$'
-# # CORS_ALLOWED_ORIGINS = [
-# #     'http://localhost:3000',
-# # ]
 
 
 ROOT_URLCONF = 'backend.urls'
@@ -140,8 +132,6 @@ DJOSER = {
     'SERIALIZERS': {'user': 'api.serializers.CustomUserSerializer',
                     'current_user': 'api.serializers.CustomUserSerializer',},
     'HIDE_USERS': False,
-    # 'USER_ID_FIELD': 'id',
-    # 'LOGIN_FIELD': 'email',
 }
 
 

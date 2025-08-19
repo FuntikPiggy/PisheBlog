@@ -5,7 +5,6 @@ from rest_framework.routers import DefaultRouter
 
 from .views import FgUserViewSet, TagViewSet, IngredientViewSet, RecipeViewSet
 
-
 app_name = 'api'
 
 router = DefaultRouter()

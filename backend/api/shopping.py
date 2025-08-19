@@ -1,6 +1,6 @@
+from math import ceil
 import io
 import os
-from math import ceil
 
 from django.http import FileResponse
 from reportlab.pdfgen import canvas
@@ -13,10 +13,10 @@ from .constants import (FONT_REG, FONT_MED, BIG_FONT, SMALL_FONT,
 basedir = os.path.dirname(os.path.abspath(__file__)) + '\\static\\api\\'
 pdfmetrics.registerFont(TTFont(FONT_MED, basedir + f'fonts\\{FONT_MED}.ttf'))
 pdfmetrics.registerFont(TTFont(FONT_REG, basedir + f'fonts\\{FONT_REG}.ttf'))
+image = basedir + '\\images\\logo.jpeg'
 
 
 def save_shopping_file(ingredients):
-    image = basedir + '\\image\\logo.jpeg'
     buffer = io.BytesIO()
     cart_file = canvas.Canvas(buffer)
     pages = ceil(len(ingredients) / ROWS_PER_PAGE)
@@ -39,4 +39,4 @@ def save_shopping_file(ingredients):
         cart_file.showPage()
     cart_file.save()
     buffer.seek(0)
-    return FileResponse(buffer, as_attachment=True, filename="shopping_cart.pdf")
+    return FileResponse(buffer, as_attachment=True, filename="shopping.pdf")

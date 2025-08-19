@@ -1,3 +1,4 @@
+# models.py
 # Максимально-допустимые длины строк
 USERNAME_LENGTH = 150
 EMAIL_LENGTH = 254

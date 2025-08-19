@@ -1,3 +1,4 @@
+# shopping.py
 # Имена шрифтов
 FONT_MED = 'Unbounded-Medium'
 FONT_REG = 'Unbounded-Regular'
