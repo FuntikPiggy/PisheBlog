@@ -1,5 +1,5 @@
 volumes:
-  fg_pg_data:
+  pg_data:
   static:
   media:
 
@@ -8,9 +8,9 @@ services:
     image: postgres:17-alpine
     env_file: .env
     volumes:
-      - fg_pg_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+      - pg_data:/var/lib/postgresql/data
+#    ports:
+#      - "5432:5432"
   backend:
     image: funtikpiggy/foodgram_backend
     env_file: .env
@@ -32,7 +32,7 @@ services:
       - backend
       - frontend
     ports:
-      - 8500:80
+      - 8600:80
     volumes:
       - static:/staticfiles
       - media:/media
