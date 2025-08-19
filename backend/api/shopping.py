@@ -2,6 +2,7 @@ from math import ceil
 import io
 import os
 
+from django.conf import settings
 from django.http import FileResponse
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
@@ -10,8 +11,10 @@ from reportlab.pdfbase.ttfonts import TTFont
 from .constants import (FONT_REG, FONT_MED, BIG_FONT, SMALL_FONT,
                         PAGE_FONT, ROWS_PER_PAGE, ROW_STEP)
 
-basedir = os.path.abspath(
-    os.path.join(os.path.dirname( __file__ ), '..',)) + '\\static\\api\\'
+basedir = os.path.dirname(os.path.abspath(__file__)).replace('/', '\\') + '\\static\\api'
+# basedir = settings.BASE_DIR / 'api' / 'static' / 'api'
+# basedir = os.path.abspath(
+#     os.path.join(os.path.dirname( __file__ ), '..',)) + '\\static\\api\\'
 pdfmetrics.registerFont(TTFont(FONT_MED, basedir + f'\\fonts\\{FONT_MED}.ttf'))
 pdfmetrics.registerFont(TTFont(FONT_REG, basedir + f'\\fonts\\{FONT_REG}.ttf'))
 image = basedir + '\\images\\logo.jpeg'
