@@ -22,7 +22,7 @@ const Technologies = () => {
                 <a href="https://www.python.org/">Python</a>
               </li>
               <li className={styles.textItem}>
-                <a href="https://www.djangoproject.com/">Django</a>Django
+                <a href="https://www.djangoproject.com/">Django</a>
               </li>
               <li className={styles.textItem}>
                 <a href="https://www.django-rest-framework.org/">Django REST Framework</a>
