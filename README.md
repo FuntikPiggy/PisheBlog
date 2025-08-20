@@ -82,6 +82,7 @@ DJANGO_SECRET_KEY=<секретный ключ Django>
 DJANGO_ALLOWED_HOSTS=<имя или IP-адрес хоста>
 DEBUG_MODE=  # Любая строка == True, не заполнено == False
 DB_PROD_TYPE=True  # Любая строка == True (для Postgres), не заполнено == False(для SQLite)
+CSRF_TRUSTED='<https://subdomain.example.com>'  # Ваш адрес
 ```
 
 Запустить проект:
