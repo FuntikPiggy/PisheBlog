@@ -42,6 +42,8 @@ MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
+CSRF_TRUSTED_ORIGINS=os.getenv('CSRF_TRUSTED', 'localhost')
+
 INTERNAL_IPS = [
     '127.0.0.1',
 ]
