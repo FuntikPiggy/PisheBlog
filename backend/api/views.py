@@ -178,4 +178,9 @@ class RecipeViewSet(ModelViewSet):
 @permission_classes((IsAuthenticatedOrReadOnly,))
 def short_link_decode(request, shorturl):
     """Функция представления для декодирования коротких ссылок."""
-    return redirect('api:recipe-detail', decode_url(shorturl))
+    return redirect(
+        request.build_absolute_uri().replace(
+            request.get_full_path(),
+            f'/recipes/{decode_url(shorturl)}'
+        )
+    )

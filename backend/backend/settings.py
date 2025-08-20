@@ -27,7 +27,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',
-    'admin_reorder',
     'django_filters',
     'recipes.apps.RecipesConfig',
 ]
@@ -40,7 +39,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'admin_reorder.middleware.ModelAdminReorder',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
@@ -150,9 +148,3 @@ REST_FRAMEWORK = {
         'anon': '1000/day',
     }
 }
-
-
-ADMIN_REORDER = (
-    {'app': 'auth', 'models': (AUTH_USER_MODEL, 'auth.Group'),},
-    {'app': 'recipes', 'models': ('recipes.Recipe', 'recipes.Ingredient', 'recipes.Tag',),},
-)
