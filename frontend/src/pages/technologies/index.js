@@ -19,7 +19,7 @@ const Technologies = () => {
           <div className={styles.text}>
             <ul className={styles.textItem}>
               <li className={styles.textItem}>
-                <a href="https://www.python.org/">Python</>
+                <a href="https://www.python.org/">Python</a>
               </li>
               <li className={styles.textItem}>
                 <a href="https://www.djangoproject.com/">Django</a>Django
