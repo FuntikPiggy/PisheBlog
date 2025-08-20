@@ -72,11 +72,11 @@ class Command(BaseCommand):
                         to_db = [tuple(i[j] for j in json_clmns) for i in dr]
                         # Оформляем команду запроса на вставку значений в БД
                         sql_command = (f'INSERT INTO {table} ('
-                                       f'{', '.join(json_clmns)}'
-                                       f') VALUES ('
-                                       f'{', '.join(['?', '%s'][DBT]
+                                       f'{", ".join(json_clmns)}'
+                                       ') VALUES ('
+                                       f'{", ".join(["?", "%s"][DBT]
                                                     for _ in json_clmns)}'
-                                       f');')
+                                       ');')
                         try:
                             # Производим вставку значений,
                             # полученных из файла css в БД
