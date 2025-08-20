@@ -62,9 +62,11 @@ class Command(BaseCommand):
                     # Оформляем список имён всех столбцов в текущем файле css
                     json_clmns = list(dr[0].keys())
                     # Если все имена столбцов в файле есть в таблице
+                    filename = file.split('\\')[-1].split('.')[0]
+                    tablename = '_'.join(table.split('_')[1:])
                     if (set(json_clmns) <= set(tbl_clmns)
-                        and file.split('\\')[-1].split('.')[0][:-1]
-                            == '_'.join(table.split('_')[1:])):
+                        and (filename[:-1] == tablename)
+                            or filename == tablename):
                         # Оформляем список кортежей из значений
                         # (один кортеж - одна запись таблицы)
                         to_db = [tuple(i[j] for j in json_clmns) for i in dr]

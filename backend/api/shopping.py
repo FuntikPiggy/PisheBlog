@@ -10,6 +10,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from .constants import (FONT_REG, FONT_MED, BIG_FONT, SMALL_FONT,
                         PAGE_FONT, ROWS_PER_PAGE, ROW_STEP)
 
+
 basedir = settings.BASE_DIR / 'api' / 'static' / 'api'
 pdfmetrics.registerFont(TTFont(FONT_MED, str(
     basedir / 'fonts' / f'{FONT_MED}.ttf')))

@@ -7,16 +7,14 @@ from .models import Tag, Ingredient, Recipe
 
 User = get_user_model()
 
+admin.site.empty_value_display = 'Не задано'
+
 
 @admin.register(User)
 class FgUserAdmin(UserAdmin):
     """Настройки раздела пользователей админ-панели."""
 
-    def get_fieldsets(self, request, obj=None):
-        fieldsets = super().get_fieldsets(request, obj)
-        fieldsets[1][1]['fields'] = fieldsets[1][1]['fields'] + ('bio',)
-        fieldsets[2][1]['fields'] = ('role',) + fieldsets[2][1]['fields']
-        return fieldsets
+    list_editable = ('first_name', 'last_name')
 
 
 @admin.register(Tag)
@@ -31,11 +29,41 @@ class IngredientAdmin(admin.ModelAdmin):
     """Настройки раздела Ингредиенты админ-панели."""
 
     list_display = ('name', 'measurement_unit',)
+    list_per_page = 15
+    search_fields = ('name',)
+
+
+class TagsInline(admin.TabularInline):
+    model = Recipe.tags.through
+
+
+class IngredientInline(admin.TabularInline):
+    model = Recipe.ingredients.through
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     """Настройки раздела Рецепты админ-панели."""
 
-    list_display = ('name', 'text', 'cooking_time', 'author', 'image',)
-    # filter_horizontal = ('ingredients', 'tags',)
+    fields = ('author_name', 'followers', 'self_name',
+              'image', 'text', 'cooking_time',)
+    readonly_fields = ('author_name', 'followers', 'self_name',)
+    list_display = ('self_name', 'author_name', 'followers', 'text', )
+    search_fields = ('name', 'author__first_name', 'author__last_name',)
+    list_filter = ('tags__name',)
+    inlines = [
+        TagsInline,
+        IngredientInline,
+    ]
+
+    @admin.display(description="Добавили в избранное",)
+    def followers(self, obj):
+        return obj.userfavorites.count()
+
+    @admin.display(description="Автор",)
+    def author_name(self, obj):
+        return f'{obj.author.first_name} {obj.author.last_name}'
+
+    @admin.display(description="Название",)
+    def self_name(self, obj):
+        return obj.name

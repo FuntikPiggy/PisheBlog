@@ -24,4 +24,4 @@ class RecipeFilter(filters.FilterSet):
 class IngredientFilter(filters.FilterSet):
     """Фильтр для ингредиентов"""
 
-    name = filters.CharFilter(field_name='name', lookup_expr='startswith',)
+    name = filters.CharFilter(field_name='name', lookup_expr='istartswith',)

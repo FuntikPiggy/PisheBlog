@@ -3,7 +3,6 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 from django.db.models import ForeignKey
-from django.urls import reverse
 
 from . import constants
 
@@ -68,7 +67,7 @@ class FgUser(AbstractUser):
         return (f'{self.username[:64]=} '
                 f'{self.first_name[:64]=} '
                 f'{self.last_name[:64]=} '
-                f'{self.email[:64]=} ')
+                f'{self.email[:64]=}')
 
 
 User = get_user_model()
@@ -178,15 +177,16 @@ class Recipe(models.Model):
         default_related_name = 'recipes'
 
     def __str__(self):
-        return (f'{self.name[:32]=} '
-                f'{self.ingredients.__str__()=}'
-                f'{self.tags.__str__()=}')
-
-    def get_absolute_url(self):
-        return reverse('api:recipe-detail', args=(self.id,))
+        return (f'{self.name[:32]=}'
+                f'{self.author=}'
+                f'{self.pub_date=}'
+                f'{self.ingredients=}'
+                f'{self.tags=} ')
 
 
 class RecipeTag(models.Model):
+    """Модель связи рецепта и тэга, таблица recipes_recipetag."""
+
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
 
@@ -199,6 +199,8 @@ class RecipeTag(models.Model):
 
 
 class RecipeIngredient(models.Model):
+    """Модель связи рецепта и ингредиента, таблица recipes_recipeingredient."""
+
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE,)
     amount = models.PositiveSmallIntegerField()
@@ -208,22 +210,32 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         return (f'{self.recipe.name[:32]=} '
-                f'{self.ingredient.name[:32]=}')
+                f'{self.ingredient.name[:32]=} '
+                f'{self.amount=}')
 
 
-class UserFavorites(models.Model):
+class UserFavoritesBase(models.Model):
+    """Базовый класс для моделей связи пользователей и
+    рецептов для логики избранного и корзины покупок."""
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,)
+
+    class Meta:
+        abstract = True
 
     def __str__(self):
         return (f'{self.user.username[:32]=} '
                 f'{self.recipe.name[:32]=}')
 
 
-class UserShoppingCart(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,)
+class UserFavorites(UserFavoritesBase):
+    """Модель связи пользователя и рецепта, таблица recipes_userfavorites."""
 
-    def __str__(self):
-        return (f'{self.user.username[:32]=} '
-                f'{self.recipe.name[:32]=}')
+    class Meta:
+        default_related_name = 'userfavorites'
+
+
+class UserShoppingCart(UserFavoritesBase):
+    """Модель связи пользователя и рецепта,
+    таблица recipes_usershoppingcart."""
