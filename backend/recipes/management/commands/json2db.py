@@ -60,23 +60,24 @@ class Command(BaseCommand):
                         [description for description in cur.description]
                     ))
                     # Оформляем список имён всех столбцов в текущем файле css
-                    json_clmns = list(dr[0].keys())
+                    jsn_clmns = list(dr[0].keys())
                     # Если все имена столбцов в файле есть в таблице
                     filename = file.split('\\')[-1].split('.')[0]
                     tablename = '_'.join(table.split('_')[1:])
-                    if (set(json_clmns) <= set(tbl_clmns)
+                    if (set(jsn_clmns) <= set(tbl_clmns)
                         and (filename[:-1] == tablename)
                             or filename == tablename):
                         # Оформляем список кортежей из значений
                         # (один кортеж - одна запись таблицы)
-                        to_db = [tuple(i[j] for j in json_clmns) for i in dr]
+                        to_db = [tuple(i[j] for j in jsn_clmns) for i in dr]
                         # Оформляем команду запроса на вставку значений в БД
-                        sql_command = (f'INSERT INTO {table} ('
-                                       f'{", ".join(json_clmns)}'
-                                       ') VALUES ('
-                                       f'{", ".join(["?", "%s"][DBT]
-                                                    for _ in json_clmns)}'
-                                       ');')
+                        sql_command = (
+                            f'INSERT INTO {table} ('
+                            f'{", ".join(jsn_clmns)}'
+                            f') VALUES ('
+                            f'{", ".join(["?", "%s"][DBT] for _ in jsn_clmns)}'
+                            f');'
+                        )
                         try:
                             # Производим вставку значений,
                             # полученных из файла css в БД
