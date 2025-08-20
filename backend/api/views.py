@@ -162,7 +162,7 @@ class RecipeViewSet(ModelViewSet):
         ingredients = [
             (k[0], f'{sum(v)} {k[1]}') for k, v in ingredients.items()
         ]
-        return save_shopping_file(ingredients)
+        return save_shopping_file(sorted(ingredients))
 
     @action(('get',), url_path='get-link',
             detail=True, permission_classes=(AllowAny,),)
