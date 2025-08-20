@@ -120,9 +120,3 @@ sudo docker compose exec backend python manage.py loaddata ./data/indented_db.js
 ```
 sudo docker compose exec backend python manage.py createsuperuser
 ```
-
-Тестовые данные пользователей:
-1. Admin: email - vg@mail.ru, password - 1234
-2. User: email - ii@mail.ru, password - 1234
-3. User: email - ap@mail.ru, password - 1234
-4. User: email - os@mail.ru, password - 1234
