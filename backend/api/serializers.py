@@ -91,6 +91,15 @@ class TagSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'name', 'slug',)
 
 
+class TagToRecipeInSerializer(serializers.ModelSerializer):
+    """Сериализатор данных модели Tag для создания рецепта."""
+
+    class Meta:
+        model = Tag
+        fields = ('id', )
+        read_only_fields = ('id', )
+
+
 class IngredientSerializer(serializers.ModelSerializer):
     """Сериализатор данных модели Ingredient."""
 
@@ -148,14 +157,13 @@ class BaseRecipeSerializer(serializers.ModelSerializer):
 class RecipeInSerializer(BaseRecipeSerializer):
     """Сериализатор ввода данных модели Recipe."""
 
-    tags = serializers.PrimaryKeyRelatedField(
-        many=True, default=TagSerializer(), read_only=True)
+    tags = TagToRecipeInSerializer(many=True, read_only=True)
 
     class Meta(BaseRecipeSerializer.Meta):
         model = Recipe
 
     def create(self, validated_data):
-        tags_ids = validated_data.pop('tags', [])
+        tags_ids = self.context['request'].data.get('tags', [])
         ingredients_amounts = self.initial_data['ingredients']
         recipe = Recipe.objects.create(**validated_data)
         for tag_id in tags_ids:
