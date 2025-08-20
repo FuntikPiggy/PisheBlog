@@ -169,8 +169,10 @@ class RecipeViewSet(ModelViewSet):
     def get_link(self, request, *args, **kwargs):
         """Метод получения короткой ссылки."""
         return Response(
-            {'short-link': f'https://{request.get_host()}'
-                           f'/s/{encode_url(int(kwargs['id']))}'},
+            {
+                'short-link': f'https://{request.get_host()}'
+                              f'/s/{encode_url(int(kwargs['id']))}'
+            },
             status=status.HTTP_200_OK,
         )
 

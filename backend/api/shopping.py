@@ -28,7 +28,9 @@ def save_shopping_file(ingredients):
         ingredients_on_page = ingredients[start:start + ROWS_PER_PAGE]
         cart_file.setFont(FONT_MED, BIG_FONT)
         x, y = 70, 770
-        cart_file.drawString(x, y, f'Список покупок из{' ' * 26}:')
+        cart_file.drawString(
+            x, y, f'Список покупок из{' ' * 26}:'
+        )
         cart_file.setFont(FONT_REG, SMALL_FONT)
         y -= ROW_STEP
         for name, amount in ingredients_on_page:
