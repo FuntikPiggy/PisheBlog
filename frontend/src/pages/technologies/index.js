@@ -19,22 +19,34 @@ const Technologies = () => {
           <div className={styles.text}>
             <ul className={styles.textItem}>
               <li className={styles.textItem}>
-                Python
+                <a href="https://www.python.org/">Python</>
               </li>
               <li className={styles.textItem}>
-                Django
+                <a href="https://www.djangoproject.com/">Django</a>Django
               </li>
               <li className={styles.textItem}>
-                Django REST Framework
+                <a href="https://www.django-rest-framework.org/">Django REST Framework</a>
               </li>
               <li className={styles.textItem}>
-                Djoser
+                <a href="https://djoser.readthedocs.io/en/latest/index.html">Djoser</a>
+              </li>
+              <li className={styles.textItem}>
+                <a href="https://www.postgresql.org/">PostgreSQL</a>
+              </li>
+              <li className={styles.textItem}>
+                <a href="https://gunicorn.org/">Gunicorn 'Green Unicorn'</a>
+              </li>
+              <li className={styles.textItem}>
+                <a href="https://nginx.org/ru/">NGINX</a>
+              </li>
+              <li className={styles.textItem}>
+                А так же различные библиотеки для Django.
               </li>
             </ul>
           </div>
         </div>
       </div>
-      
+
     </Container>
   </Main>
 }

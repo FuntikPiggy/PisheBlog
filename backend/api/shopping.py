@@ -36,7 +36,7 @@ def save_shopping_file(ingredients):
             y -= ROW_STEP
             cart_file.drawString(x, y, f'● {name}')
             cart_file.drawString(430, y, f'{amount}')
-        cart_file.drawInlineImage(image, 317, 767, width=120, height=35)
+        cart_file.drawInlineImage(image, 317, 766.4, width=120, height=35)
         cart_file.drawInlineImage(image, 200, 50, width=200, height=60)
         cart_file.setFont(FONT_REG, PAGE_FONT)
         cart_file.drawString(300, 100, f'Страница {page} из {pages}')

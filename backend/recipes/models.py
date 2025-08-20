@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 from django.db.models import ForeignKey
 from django.urls import reverse
@@ -15,8 +16,17 @@ class FgUser(AbstractUser):
     username = models.CharField(
         max_length=constants.USERNAME_LENGTH,
         unique=True,
+        validators=(UnicodeUsernameValidator(),),
         verbose_name='Псевдоним',
         help_text='Используются только буквы, цифры и символы @/./+/-/_ .',
+    )
+    first_name = models.CharField(
+        max_length=constants.FIRSTNAME_LENGTH,
+        verbose_name='Имя',
+    )
+    last_name = models.CharField(
+        max_length=constants.LASTNAME_LENGTH,
+        verbose_name='Фамилия',
     )
     email = models.EmailField(
         max_length=constants.EMAIL_LENGTH,

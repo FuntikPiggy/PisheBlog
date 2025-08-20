@@ -7,7 +7,7 @@ from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from rest_framework import status, filters
-from rest_framework.decorators import action
+from rest_framework.decorators import action, permission_classes
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly, AllowAny)
 from rest_framework.response import Response
@@ -90,7 +90,6 @@ class TagViewSet(ReadOnlyModelViewSet):
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = None
 
 
@@ -99,7 +98,6 @@ class IngredientViewSet(ReadOnlyModelViewSet):
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
     filter_backends = (filters.SearchFilter, DjangoFilterBackend,)
     filterset_class = IngredientFilter
     search_fields = ('^name',)
@@ -110,7 +108,7 @@ class RecipeViewSet(ModelViewSet):
     """Представление модели рецепта."""
 
     http_method_names = ('get', 'post', 'patch', 'delete',)
-    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrStaff,)
+    permission_classes = (IsAuthenticatedOrReadOnly|SelfOrStaffOrReadOnly,)
     queryset = Recipe.objects.all().prefetch_related(
         'ingredients', 'recipeingredients', 'tags', 'author')
     serializer_class = RecipeOutSerializer
@@ -177,12 +175,7 @@ class RecipeViewSet(ModelViewSet):
             status=status.HTTP_200_OK,
         )
 
-
+@permission_classes((IsAuthenticatedOrReadOnly,))
 def short_link_decode(request, shorturl):
     """Функция представления для декодирования коротких ссылок."""
-    return redirect(
-        f'http://{request.get_host()}/{reverse(
-            'api:recipe-detail',
-            kwargs={'id': decode_url(shorturl), },
-        )}'
-    )
+    return redirect('api:recipe-detail', decode_url(shorturl))
