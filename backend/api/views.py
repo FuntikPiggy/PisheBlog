@@ -3,7 +3,6 @@ from functools import wraps
 from django.contrib.auth import get_user_model
 from django.db.models import F
 from django.shortcuts import redirect
-from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from rest_framework import status, filters
@@ -108,7 +107,7 @@ class RecipeViewSet(ModelViewSet):
     """Представление модели рецепта."""
 
     http_method_names = ('get', 'post', 'patch', 'delete',)
-    permission_classes = (IsAuthenticatedOrReadOnly|SelfOrStaffOrReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly | SelfOrStaffOrReadOnly,)
     queryset = Recipe.objects.all().prefetch_related(
         'ingredients', 'recipeingredients', 'tags', 'author')
     serializer_class = RecipeOutSerializer
@@ -174,6 +173,7 @@ class RecipeViewSet(ModelViewSet):
                            f'/s/{encode_url(int(kwargs['id']))}'},
             status=status.HTTP_200_OK,
         )
+
 
 @permission_classes((IsAuthenticatedOrReadOnly,))
 def short_link_decode(request, shorturl):
