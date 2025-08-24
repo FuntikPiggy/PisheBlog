@@ -1,13 +1,16 @@
+import re
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
-from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.core.validators import RegexValidator, MinValueValidator
 from django.db import models
 from django.db.models import ForeignKey
 
 from . import constants
+from .constants import USERNAME_VALID, USERNAME_REGEX
 
 
-class FgUser(AbstractUser):
+class FoodgramUser(AbstractUser):
     """Модель пользователя, таблица users_fguser."""
 
     USERNAME_FIELD = 'email'
@@ -15,9 +18,13 @@ class FgUser(AbstractUser):
     username = models.CharField(
         max_length=constants.USERNAME_LENGTH,
         unique=True,
-        validators=(UnicodeUsernameValidator(),),
+        validators=(RegexValidator(
+            regex = USERNAME_REGEX,
+            message=USERNAME_VALID,
+            flags = re.ASCII
+        ),),
         verbose_name='Псевдоним',
-        help_text='Используются только буквы, цифры и символы @/./+/-/_ .',
+        help_text=USERNAME_VALID,
     )
     first_name = models.CharField(
         max_length=constants.FIRSTNAME_LENGTH,
@@ -37,24 +44,6 @@ class FgUser(AbstractUser):
         null=True,
         default=None,
         verbose_name='Аватар',
-    )
-    subscriptions = models.ManyToManyField(
-        'self',
-        symmetrical=False,
-        related_name='followers',
-        verbose_name='Подписки',
-    )
-    favorites = models.ManyToManyField(
-        'Recipe',
-        through='UserFavorites',
-        related_name='fans',
-        verbose_name='В избранном',
-    )
-    shopping_cart = models.ManyToManyField(
-        'Recipe',
-        through='UserShoppingCart',
-        related_name='buyers',
-        verbose_name='В списке покупок',
     )
 
     class Meta:
@@ -95,7 +84,7 @@ class Tag(models.Model):
 
     def __str__(self):
         return (f'{self.name[:32]=} '
-                f'{self.slug[:32]=}')
+                f'{self.slug=}')
 
 
 class Ingredient(models.Model):
@@ -111,23 +100,19 @@ class Ingredient(models.Model):
     )
 
     class Meta:
-        verbose_name = 'ингредиент'
-        verbose_name_plural = 'Ингредиенты'
+        verbose_name = 'продукт'
+        verbose_name_plural = 'Продукты'
         ordering = ('name',)
+        constraints = (
+            models.UniqueConstraint(
+                fields=('name', 'measurement_unit',),
+                name='unique_ingredient',
+            ),
+        )
 
     def __str__(self):
         return (f'{self.name[:32]=} '
                 f'{self.measurement_unit[:32]=}')
-
-
-class CookingTimeField(models.PositiveSmallIntegerField):
-    """Формат поля для времени приготовления >=1."""
-
-    def formfield(self, **kwargs):
-        return super(
-            models.PositiveSmallIntegerField,
-            self
-        ).formfield(**{"min_value": 1, **kwargs, })
 
 
 class Recipe(models.Model):
@@ -140,8 +125,11 @@ class Recipe(models.Model):
     text = models.TextField(
         verbose_name='Текст',
     )
-    cooking_time = CookingTimeField(
+    cooking_time = models.PositiveIntegerField(
         verbose_name='Время приготовления',
+        validators=(
+            MinValueValidator(1),
+        )
     )
     author = ForeignKey(
         User,
@@ -162,7 +150,6 @@ class Recipe(models.Model):
     )
     tags = models.ManyToManyField(
         Tag,
-        through='RecipeTag',
         verbose_name='Тэги',
     )
     pub_date = models.DateTimeField(
@@ -180,33 +167,33 @@ class Recipe(models.Model):
         return (f'{self.name[:32]=}'
                 f'{self.author=}'
                 f'{self.pub_date=}'
-                f'{self.ingredients=}'
                 f'{self.tags=} ')
-
-
-class RecipeTag(models.Model):
-    """Модель связи рецепта и тэга, таблица recipes_recipetag."""
-
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-
-    class Meta:
-        default_related_name = 'recipetags'
-
-    def __str__(self):
-        return (f'{self.recipe.name[:32]=} '
-                f'{self.tag.name[:32]=}')
 
 
 class RecipeIngredient(models.Model):
     """Модель связи рецепта и ингредиента, таблица recipes_recipeingredient."""
 
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,)
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE,)
-    amount = models.PositiveSmallIntegerField()
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name='Рецепт',
+    )
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        verbose_name='Продукт',
+    )
+    amount = models.PositiveSmallIntegerField(
+        validators=(
+            MinValueValidator(1),
+        ),
+        verbose_name='Количество',
+    )
 
     class Meta:
         default_related_name = 'recipeingredients'
+        verbose_name = 'ингредиент'
+        verbose_name_plural = 'Ингредиенты'
 
     def __str__(self):
         return (f'{self.recipe.name[:32]=} '
@@ -214,28 +201,50 @@ class RecipeIngredient(models.Model):
                 f'{self.amount=}')
 
 
-class UserFavoritesBase(models.Model):
+class UserFavoriteBase(models.Model):
     """Базовый класс для моделей связи пользователей и
     рецептов для логики избранного и корзины покупок."""
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+    )
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,)
 
     class Meta:
         abstract = True
+        default_related_name = '%(class)ss'
+        constraints = (
+            models.UniqueConstraint(
+                fields=('user', 'recipe',),
+                name='unique_%(class)s',
+            ),
+        )
 
     def __str__(self):
         return (f'{self.user.username[:32]=} '
                 f'{self.recipe.name[:32]=}')
 
 
-class UserFavorites(UserFavoritesBase):
-    """Модель связи пользователя и рецепта, таблица recipes_userfavorites."""
+class UserFavorite(UserFavoriteBase):
+    """Модель связи пользователя и рецепта, таблица recipes_userfavorite."""
+
+
+class UserPurchase(UserFavoriteBase):
+    """Модель связи пользователя и рецепта,
+    таблица recipes_userpurchase."""
+
+
+class Followings(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subscriptions')
+    following = models.ForeignKey(User, on_delete=models.CASCADE, related_name='followers')
 
     class Meta:
-        default_related_name = 'userfavorites'
-
-
-class UserShoppingCart(UserFavoritesBase):
-    """Модель связи пользователя и рецепта,
-    таблица recipes_usershoppingcart."""
+        constraints = (
+            models.UniqueConstraint(
+                fields=('user', 'following',),
+                name='unique_following',
+            ),
+        )
+        verbose_name = 'подписка'
+        verbose_name_plural = 'Подписки'

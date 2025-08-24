@@ -2,7 +2,8 @@ from functools import wraps
 
 from django.contrib.auth import get_user_model
 from django.db.models import F
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
+from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from rest_framework import status, filters
@@ -15,12 +16,12 @@ from short_url import encode_url, decode_url
 
 from recipes.models import Tag, Ingredient, Recipe
 from .filters import RecipeFilter, IngredientFilter
-from .pagination import QueryPageNumberPagination, paginated
+from .pagination import QueryPageNumberPagination, RecipesQueryPageLimitPagination  # , paginated
 from .permissions import IsAuthorOrStaff, SelfOrStaffOrReadOnly
 from .serializers import (TagSerializer, IngredientSerializer,
-                          RecipeInSerializer, SubscriptionsSerializer,
-                          RecipeOutSerializer, CustomUserSerializer,
-                          SubscriptionRecipeSerializer)
+                          RecipeInSerializer, UserSubscriptionsSerializer,
+                          CustomUserSerializer,
+                          RecipeSerializer, BaseRecipeSerializer)
 from .shopping import save_shopping_file
 
 User = get_user_model()
@@ -47,25 +48,45 @@ def manytomany_setter_deleter(func):
     return wrapper
 
 
-class FgUserViewSet(UserViewSet):
+class FoodgramUserViewSet(UserViewSet):
     """Представление модели пользователя."""
 
     http_method_names = ('get', 'post', 'put', 'delete',)
     serializer_class = CustomUserSerializer
-    pagination_class = QueryPageNumberPagination
-    permission_classes = (IsAuthenticated, SelfOrStaffOrReadOnly,)
+    # pagination_class = QueryPageNumberPagination
+    permission_classes = (AllowAny,)# IsAuthenticated, SelfOrStaffOrReadOnly,)
 
-    @paginated
-    @action(('get',), detail=False, permission_classes=(IsAuthenticated,),)
+
+    # def get_serializer_context(self):
+    #     return {
+    #         'request': self.request,
+    #         ''
+    #     }
+
+    # @paginated
+    @action(('get',), detail=False, permission_classes=(AllowAny,),)#(IsAuthenticated,),)
     def subscriptions(self, request):
         """Метод просмотра подписок."""
-        return SubscriptionsSerializer(request.user.subscriptions.all(),
-                                       many=True, context={'request': request},
-                                       ).data
+        page = self.paginate_queryset(
+            UserSubscriptionsSerializer(
+                User.objects.filter(id__in=request.user.subscriptions.values('following'),),
+                many=True,
+                context={'request': request},
+            ).data
+        )
+        return self.get_paginated_response(page)
+
+    @action(
+        ('get',),
+        detail=False, permission_classes=(IsAuthenticated,),
+    )
+    def me(self, request, *args, **kwargs):
+        """Метод добавления и удаления аватара."""
+        return Response(self.get_serializer(request.user).data, status=status.HTTP_200_OK)
 
     @action(
         ('put', 'delete'), url_path='me/avatar',
-        detail=False, permission_classes=(IsAuthorOrStaff,),
+        detail=False, permission_classes=(AllowAny,),#IsAuthorOrStaff,),
     )
     def avatar(self, request, *args, **kwargs):
         """Метод добавления и удаления аватара."""
@@ -78,10 +99,10 @@ class FgUserViewSet(UserViewSet):
 
     @manytomany_setter_deleter
     @action(('post', 'delete',), detail=True,
-            permission_classes=(IsAuthenticated,),)
+            permission_classes=(AllowAny,),)#IsAuthenticated,),)
     def subscribe(self, request, *args, **kwargs):
         """Метод подписки."""
-        return request.user.subscriptions, SubscriptionsSerializer
+        return request.user.subscriptions, UserSubscriptionsSerializer
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -110,10 +131,11 @@ class RecipeViewSet(ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly | SelfOrStaffOrReadOnly,)
     queryset = Recipe.objects.all().prefetch_related(
         'ingredients', 'recipeingredients', 'tags', 'author')
-    serializer_class = RecipeOutSerializer
+    serializer_class = BaseRecipeSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     lookup_url_kwarg = 'id'
+    # pagination_class = RecipesQueryPageLimitPagination
 
     def get_serializer_class(self, *args, **kwargs):
         if self.action in ('create', 'partial_update'):
@@ -135,14 +157,14 @@ class RecipeViewSet(ModelViewSet):
             permission_classes=(IsAuthenticated,),)
     def favorite(self, request, *args, **kwargs):
         """Метод добавления в избранное."""
-        return request.user.favorites, SubscriptionRecipeSerializer
+        return request.user.favorites, RecipeSerializer
 
     @manytomany_setter_deleter
     @action(('post', 'delete',), detail=True,
             permission_classes=(IsAuthenticated,),)
     def shopping_cart(self, request, *args, **kwargs):
         """Метод добавления в корзину покупок."""
-        return request.user.shopping_cart, SubscriptionRecipeSerializer
+        return request.user.shopping_cart, RecipeSerializer
 
     @action(('get',), detail=False,
             permission_classes=(IsAuthenticated,),)
@@ -166,21 +188,12 @@ class RecipeViewSet(ModelViewSet):
 
     @action(('get',), url_path='get-link',
             detail=True, permission_classes=(AllowAny,),)
-    def get_link(self, request, *args, **kwargs):
+    def get_link(self, request, recipe_id):
         """Метод получения короткой ссылки."""
+        get_object_or_404(Recipe, id=recipe_id)
         return Response(
-            {'short-link': f'https://{request.get_host()}'
-                           f'/s/{encode_url(int(kwargs['id']))}'},
+            {'short-link': request.get_absolute_url(reverse('recipes:short-link')),},
+             # f'https://{request.get_host()}'
+             #               f'/s/{encode_url(int(kwargs['id']))}'},
             status=status.HTTP_200_OK,
         )
-
-
-@permission_classes((IsAuthenticatedOrReadOnly,))
-def short_link_decode(request, shorturl):
-    """Функция представления для декодирования коротких ссылок."""
-    return redirect(
-        request.build_absolute_uri().replace(
-            request.get_full_path(),
-            f'/recipes/{decode_url(shorturl)}'
-        )
-    )

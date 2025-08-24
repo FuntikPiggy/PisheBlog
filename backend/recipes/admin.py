@@ -11,7 +11,7 @@ admin.site.empty_value_display = 'Не задано'
 
 
 @admin.register(User)
-class FgUserAdmin(UserAdmin):
+class FoodgramUserAdmin(UserAdmin):
     """Настройки раздела пользователей админ-панели."""
 
     list_editable = ('first_name', 'last_name')
