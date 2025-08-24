@@ -60,7 +60,7 @@ class CustomUserSerializer(UserSerializer):
         return False
 
 
-class RecipeSerializer(serializers.ModelSerializer):
+class BriefRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор данных модели Recipe для Subscriptions."""
 
     class Meta:
@@ -74,16 +74,22 @@ class UserSubscriptionsSerializer(UserSerializer):
 
     is_subscribed = serializers.SerializerMethodField()
     avatar = Base64ImageField(required=False, allow_null=True)
-    recipes = RecipeSerializer(many=True)#serializers.SerializerMethodField('paginated_recipes')#RecipeSerializer()#serializers.SerializerMethodField('paginated_recipes')
+    recipes = serializers.SerializerMethodField('paginated_recipes')#RecipeSerializer()#serializers.SerializerMethodField('paginated_recipes')
     recipes_count = serializers.IntegerField(source='recipes.count')#serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
         model = User
-        fields = (*UserSerializer.Meta.fields, 'recipes', 'recipes_count', 'is_subscribed', 'avatar',)
+        fields = (*UserSerializer.Meta.fields, 'recipes',
+                  'recipes_count', 'is_subscribed', 'avatar',)
         read_only_fields = ('recipes', 'recipes_count', 'is_subscribed',)
 
-    # def paginated_recipes(self, user):
-    #     a = True
+    def paginated_recipes(self, user):
+        recipes = user.recipes.all()
+        limit = self.context.get('request').query_params.get(
+            'recipes_limit', None)
+        if limit is not None:
+            recipes = recipes[:int(limit)]
+        return BriefRecipeSerializer(recipes, many=True).data
     #     return RecipeSerializer(Paginator(
     #         user.recipes.all(),
     #         self.context['request'].query_params.get('recipes_limit', 3)
@@ -115,7 +121,7 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit',)
 
 
-class IngredientToRecipeSerializer(serializers.ModelSerializer):
+class IngredientAmountSerializer(serializers.ModelSerializer):
     """Сериализатор данных модели Ingredient для
      сериализатора вывода модели Recipe."""
 
@@ -150,19 +156,17 @@ class BaseRecipeSerializer(serializers.ModelSerializer):
         ingredients = recipe.ingredients.all()
         for ingredient in ingredients:
             ingredient.amount = recipe_ingredients[ingredient.id]
-        serializer = IngredientToRecipeSerializer(ingredients, many=True)
+        serializer = IngredientAmountSerializer(ingredients, many=True)
         return serializer.data
 
     def get_is_favorited(self, recipe):
         if self.context['request'].user.is_authenticated:
-            return self.context['request'].user.userfavorites.filter(recipe_id=recipe.id).exists()
-            # return self.context['request'].user.subscriptions.filter(following_id=user.id).exists()
+            return self.context['request'].user.favorites.filter(recipe_id=recipe.id).exists()
         return False
 
     def get_is_in_shopping_cart(self, recipe):
         if self.context['request'].user.is_authenticated:
-            return self.context['request'].user.userpurchases.filter(recipe_id=recipe.id).exists()
-            # return self.context['request'].user.subscriptions.filter(following_id=user.id).exists()
+            return self.context['request'].user.purchases.filter(recipe_id=recipe.id).exists()
         return False
 
 
@@ -175,20 +179,20 @@ class RecipeInSerializer(serializers.ModelSerializer):
         many=True,
     )
     ingredients = serializers.SerializerMethodField(read_only=True)
-    # author = CustomUserSerializer(read_only=True,)
+    author = CustomUserSerializer(read_only=True,)
     image = Base64ImageField(required=False, allow_null=True)
-    # is_favorited = serializers.SerializerMethodField(read_only=True)
-    # is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
+    is_favorited = serializers.SerializerMethodField(read_only=True)
+    is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Recipe
         fields = (
-            # 'id',
+            'id',
             'tags',
-            # 'author',
+            'author',
             'ingredients',
-            # 'is_favorited',
-            # 'is_in_shopping_cart',
+            'is_favorited',
+            'is_in_shopping_cart',
             'name',
             'image',
             'text',
@@ -228,18 +232,18 @@ class RecipeInSerializer(serializers.ModelSerializer):
         ingredients = recipe.ingredients.all()
         for ingredient in ingredients:
             ingredient.amount = recipe_ingredients[ingredient.id]
-        serializer = IngredientToRecipeSerializer(ingredients, many=True)
+        serializer = IngredientAmountSerializer(ingredients, many=True)
         return serializer.data
 
-    # def get_is_favorited(self, recipe):
-    #     if self.context['request'].user.is_authenticated:
-    #         return self.context['request'].user.userfavorites.filter(recipe_id=recipe.id).exists()
-    #     return False
-    #
-    # def get_is_in_shopping_cart(self, recipe):
-    #     if self.context['request'].user.is_authenticated:
-    #         return self.context['request'].user.userpurchases.filter(recipe_id=recipe.id).exists()
-    #     return False
+    def get_is_favorited(self, recipe):
+        if self.context['request'].user.is_authenticated:
+            return self.context['request'].user.favorites.filter(recipe_id=recipe.id).exists()
+        return False
 
-    def to_representation(self, instance):
-        return BaseRecipeSerializer().to_representation(instance)
+    def get_is_in_shopping_cart(self, recipe):
+        if self.context['request'].user.is_authenticated:
+            return self.context['request'].user.purchases.filter(recipe_id=recipe.id).exists()
+        return False
+
+    # def to_representation(self, instance):
+    #     return BaseRecipeSerializer().to_representation(instance)

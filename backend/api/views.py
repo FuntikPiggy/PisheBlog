@@ -16,12 +16,11 @@ from short_url import encode_url, decode_url
 
 from recipes.models import Tag, Ingredient, Recipe
 from .filters import RecipeFilter, IngredientFilter
-from .pagination import QueryPageNumberPagination, RecipesQueryPageLimitPagination  # , paginated
 from .permissions import IsAuthorOrStaff, SelfOrStaffOrReadOnly
 from .serializers import (TagSerializer, IngredientSerializer,
                           RecipeInSerializer, UserSubscriptionsSerializer,
                           CustomUserSerializer,
-                          RecipeSerializer, BaseRecipeSerializer)
+                          BriefRecipeSerializer, BaseRecipeSerializer)
 from .shopping import save_shopping_file
 
 User = get_user_model()
@@ -133,9 +132,15 @@ class RecipeViewSet(ModelViewSet):
         'ingredients', 'recipeingredients', 'tags', 'author')
     serializer_class = BaseRecipeSerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_class = RecipeFilter
+    # filterset_class = RecipeFilter
     lookup_url_kwarg = 'id'
     # pagination_class = RecipesQueryPageLimitPagination
+
+    # def get_queryset(self):
+    #     if 'recipes_limit' in self.kwargs:
+    #         return Recipe.objects.all()[:3]
+    #     return Recipe.objects.all().prefetch_related(
+    #     'ingredients', 'recipeingredients', 'tags', 'author')
 
     def get_serializer_class(self, *args, **kwargs):
         if self.action in ('create', 'partial_update'):
@@ -157,14 +162,14 @@ class RecipeViewSet(ModelViewSet):
             permission_classes=(IsAuthenticated,),)
     def favorite(self, request, *args, **kwargs):
         """Метод добавления в избранное."""
-        return request.user.favorites, RecipeSerializer
+        return request.user.favorites, BriefRecipeSerializer
 
     @manytomany_setter_deleter
     @action(('post', 'delete',), detail=True,
             permission_classes=(IsAuthenticated,),)
     def shopping_cart(self, request, *args, **kwargs):
         """Метод добавления в корзину покупок."""
-        return request.user.shopping_cart, RecipeSerializer
+        return request.user.shopping_cart, BriefRecipeSerializer
 
     @action(('get',), detail=False,
             permission_classes=(IsAuthenticated,),)

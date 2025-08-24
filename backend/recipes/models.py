@@ -169,6 +169,10 @@ class Recipe(models.Model):
                 f'{self.pub_date=}'
                 f'{self.tags=} ')
 
+    @property
+    def in_shopping_cart(self, user):
+        return user.purchases.filter(user_id=user.id, recipe_id=self.id).exists()
+
 
 class RecipeIngredient(models.Model):
     """Модель связи рецепта и ингредиента, таблица recipes_recipeingredient."""
@@ -226,11 +230,11 @@ class UserFavoriteBase(models.Model):
                 f'{self.recipe.name[:32]=}')
 
 
-class UserFavorite(UserFavoriteBase):
+class Favorite(UserFavoriteBase):
     """Модель связи пользователя и рецепта, таблица recipes_userfavorite."""
 
 
-class UserPurchase(UserFavoriteBase):
+class Purchase(UserFavoriteBase):
     """Модель связи пользователя и рецепта,
     таблица recipes_userpurchase."""
 

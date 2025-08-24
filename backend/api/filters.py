@@ -12,9 +12,9 @@ class RecipeFilter(filters.FilterSet):
     tags = filters.AllValuesMultipleFilter(
         field_name='tags__slug', lookup_expr='contains',)
     is_favorited = filters.ModelChoiceFilter(
-        queryset=User.objects.all(), field_name='fans',)
+        queryset=User.objects.all(), field_name='favorites',)
     is_in_shopping_cart = filters.ModelChoiceFilter(
-        queryset=User.objects.all(), field_name='buyers',)
+        queryset=User.objects.all(), field_name='purchases',)
 
     class Meta:
         model = Recipe
