@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator, MinValueValidator
 from django.db import models
 from django.db.models import ForeignKey
+from django.utils.safestring import mark_safe
 
 from . import constants
 from .constants import USERNAME_VALID, USERNAME_REGEX
@@ -57,6 +58,17 @@ class FoodgramUser(AbstractUser):
                 f'{self.first_name[:64]=} '
                 f'{self.last_name[:64]=} '
                 f'{self.email[:64]=}')
+
+    def get_avatar(self):
+        if not self.avatar:
+            return '/static/recipes/admin/ava_default.jpg'
+        return self.avatar.url
+
+    @mark_safe
+    def avatar_small(self):
+        return f'<img src="{self.get_avatar()}" width="35" height="35" />'
+
+    avatar_small.short_description = 'Аватар'
 
 
 User = get_user_model()
@@ -169,9 +181,32 @@ class Recipe(models.Model):
                 f'{self.pub_date=}'
                 f'{self.tags=} ')
 
-    @property
-    def in_shopping_cart(self, user):
-        return user.purchases.filter(user_id=user.id, recipe_id=self.id).exists()
+    def get_image(self):
+        if not self.image:
+            return '/static/recipes/admin/not-found.png'
+        return self.image.url
+
+    @mark_safe
+    def image_small(self):
+        return f'<img src="{self.get_image()}" width="50" height="50" />'
+
+    image_small.short_description = 'Изображение'
+
+    @mark_safe
+    def ingredients_ul(self):
+        return f'<ul>{"".join([f"<li>{i.name}</li>" for i in self.ingredients.all()])}</ul>'
+
+    ingredients_ul.short_description = 'Ингредиенты'
+
+    @mark_safe
+    def tags_ul(self):
+        return f'<ul>{"".join([f"<li>{i.name}</li>" for i in self.tags.all()])}</ul>'
+
+    tags_ul.short_description = 'Тэги'
+
+    # @property
+    # def in_shopping_cart(self, user):
+    #     return user.purchases.filter(user_id=user.id, recipe_id=self.id).exists()
 
 
 class RecipeIngredient(models.Model):
@@ -195,6 +230,7 @@ class RecipeIngredient(models.Model):
     )
 
     class Meta:
+        auto_created = True
         default_related_name = 'recipeingredients'
         verbose_name = 'ингредиент'
         verbose_name_plural = 'Ингредиенты'
