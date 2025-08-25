@@ -27,7 +27,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'djoser',
     'rest_framework.authtoken',
-    # 'corsheaders',
+    'corsheaders',
     'django_filters',
     'recipes.apps.RecipesConfig',
     # 'drf_yasg',
@@ -36,7 +36,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    # 'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -45,14 +45,16 @@ MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
+CSRF_TRUSTED_ORIGINS=os.getenv('CSRF_TRUSTED', 'http://localhost').split()
+
 INTERNAL_IPS = [
     '127.0.0.1',
 ]
 
-# CORS_URLS_REGEX = r'^/api/.*$'
-# CORS_ALLOWED_ORIGINS = [
-#     'http://localhost:3000',
-# ]
+CORS_URLS_REGEX = r'^/api/.*$'
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+]
 
 
 ROOT_URLCONF = 'backend.urls'

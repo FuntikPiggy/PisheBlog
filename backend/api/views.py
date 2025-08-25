@@ -1,4 +1,4 @@
-from functools import wraps
+# from functools import wraps
 
 from django.contrib.auth import get_user_model
 from django.db.models import F
@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 from short_url import encode_url, decode_url
 
-from recipes.models import Tag, Ingredient, Recipe
+from recipes.models import Tag, Ingredient, Recipe, Favorite, Purchase, Followings
 from .filters import RecipeFilter, IngredientFilter
 from .permissions import IsAuthorOrStaff, SelfOrStaffOrReadOnly
 from .serializers import (TagSerializer, IngredientSerializer,
@@ -26,25 +26,25 @@ from .shopping import save_shopping_file
 User = get_user_model()
 
 
-def manytomany_setter_deleter(func):
-    """Декоратор для методов подписки,
-    добавления в избранное и в корзину покупок."""
-    @wraps(func)
-    def wrapper(self, request, **kwargs):
-        queryset, serializer_class = func(self, request, **kwargs)
-        if request.method == 'POST':
-            if queryset.filter(id=kwargs['id']).exists():
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-            queryset.add(kwargs['id'])
-            return Response(
-                serializer_class(queryset.get(id=kwargs['id']),
-                                 context={'request': request},).data,
-                status=status.HTTP_201_CREATED,
-            )
-        elif request.method == 'DELETE':
-            queryset.remove(kwargs['id'])
-            return Response(status=status.HTTP_204_NO_CONTENT)
-    return wrapper
+# def manytomany_setter_deleter(func):
+#     """Декоратор для методов подписки,
+#     добавления в избранное и в корзину покупок."""
+#     @wraps(func)
+#     def wrapper(self, request, **kwargs):
+#         queryset, serializer_class = func(self, request, **kwargs)
+#         if request.method == 'POST':
+#             if queryset.filter(id=kwargs['id']).exists():
+#                 return Response(status=status.HTTP_400_BAD_REQUEST)
+#             queryset.add(kwargs['id'])
+#             return Response(
+#                 serializer_class(queryset.get(id=kwargs['id']),
+#                                  context={'request': request},).data,
+#                 status=status.HTTP_201_CREATED,
+#             )
+#         elif request.method == 'DELETE':
+#             queryset.remove(kwargs['id'])
+#             return Response(status=status.HTTP_204_NO_CONTENT)
+#     return wrapper
 
 
 class FoodgramUserViewSet(UserViewSet):
@@ -81,7 +81,10 @@ class FoodgramUserViewSet(UserViewSet):
     )
     def me(self, request, *args, **kwargs):
         """Метод добавления и удаления аватара."""
-        return Response(self.get_serializer(request.user).data, status=status.HTTP_200_OK)
+        return Response(
+            self.get_serializer(request.user).data,
+            status=status.HTTP_200_OK
+        )
 
     @action(
         ('put', 'delete'), url_path='me/avatar',
@@ -96,12 +99,24 @@ class FoodgramUserViewSet(UserViewSet):
             request.user.avatar.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @manytomany_setter_deleter
+    # @manytomany_setter_deleter
     @action(('post', 'delete',), detail=True,
             permission_classes=(AllowAny,),)#IsAuthenticated,),)
     def subscribe(self, request, *args, **kwargs):
         """Метод подписки."""
-        return request.user.subscriptions, UserSubscriptionsSerializer
+        following = User.objects.get(id=kwargs['id'])
+        if request.method == 'POST':
+            Followings.objects.create(user=request.user, following=following)
+            return Response(
+                UserSubscriptionsSerializer(
+                    following, context={'request': request},).data,
+                status=status.HTTP_201_CREATED,
+            )
+        elif request.method == 'DELETE':
+            Favorite.objects.get(
+                user=request.user, following=following).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        # return request.user.subscriptions, UserSubscriptionsSerializer
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -132,7 +147,7 @@ class RecipeViewSet(ModelViewSet):
         'ingredients', 'recipeingredients', 'tags', 'author')
     serializer_class = BaseRecipeSerializer
     filter_backends = (DjangoFilterBackend,)
-    # filterset_class = RecipeFilter
+    filterset_class = RecipeFilter
     lookup_url_kwarg = 'id'
     # pagination_class = RecipesQueryPageLimitPagination
 
@@ -150,26 +165,64 @@ class RecipeViewSet(ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    def perform_update(self, serializer):
-        serializer.save(
-            author=self.request.user,
-            tags=self.request.data.get('tags', []),
-            ingredients=self.request.data.get('ingredients', []),
-        )
+    # def perform_update(self, serializer):
+    #     serializer.save(
+    #         author=self.request.user,
+    #         tags=self.request.data.get('tags', []),
+    #         ingredients=self.request.data.get('ingredients', []),
+    #     )
 
-    @manytomany_setter_deleter
+    @staticmethod
+    def favorite_shopping_base(request, klass, **kwargs):
+        """Базовый метод для методов добавления в избранное и корзину>."""
+        recipe = Recipe.objects.get(id=kwargs['id'])
+        if request.method == 'POST':
+            klass.objects.create(user=request.user, recipe=recipe)
+            return Response(
+                BriefRecipeSerializer(
+                    recipe, context={'request': request},).data,
+                status=status.HTTP_201_CREATED,
+            )
+        elif request.method == 'DELETE':
+            klass.objects.get(user=request.user, recipe=recipe).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+    # @manytomany_setter_deleter
     @action(('post', 'delete',), detail=True,
             permission_classes=(IsAuthenticated,),)
-    def favorite(self, request, *args, **kwargs):
+    def favorite(self, request, **kwargs):
         """Метод добавления в избранное."""
-        return request.user.favorites, BriefRecipeSerializer
+        return self.favorite_shopping_base(request, Favorite, **kwargs)
+        # recipe = Recipe.objects.get(id=kwargs['id'])
+        # if request.method == 'POST':
+        #     Favorite.objects.create(user=request.user, recipe=recipe)
+        #     return Response(
+        #         BriefRecipeSerializer(
+        #             recipe, context={'request': request},).data,
+        #         status=status.HTTP_201_CREATED,
+        #     )
+        # elif request.method == 'DELETE':
+        #     Favorite.objects.get(user=request.user, recipe=recipe).delete()
+        #     return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @manytomany_setter_deleter
+    # @manytomany_setter_deleter
     @action(('post', 'delete',), detail=True,
             permission_classes=(IsAuthenticated,),)
     def shopping_cart(self, request, *args, **kwargs):
         """Метод добавления в корзину покупок."""
-        return request.user.shopping_cart, BriefRecipeSerializer
+        return self.favorite_shopping_base(request, Purchase, **kwargs)
+        # recipe = Recipe.objects.get(id=kwargs['id'])
+        # if request.method == 'POST':
+        #     Purchase.objects.create(user=request.user, recipe=recipe)
+        #     return Response(
+        #         BriefRecipeSerializer(
+        #             recipe, context={'request': request},).data,
+        #         status=status.HTTP_201_CREATED,
+        #     )
+        # elif request.method == 'DELETE':
+        #     Purchase.objects.get(user=request.user, recipe=recipe).delete()
+        #     return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(('get',), detail=False,
             permission_classes=(IsAuthenticated,),)
@@ -193,12 +246,10 @@ class RecipeViewSet(ModelViewSet):
 
     @action(('get',), url_path='get-link',
             detail=True, permission_classes=(AllowAny,),)
-    def get_link(self, request, recipe_id):
+    def get_link(self, request, id):
         """Метод получения короткой ссылки."""
-        get_object_or_404(Recipe, id=recipe_id)
+        get_object_or_404(Recipe, id=id)
         return Response(
-            {'short-link': request.get_absolute_url(reverse('recipes:short-link')),},
-             # f'https://{request.get_host()}'
-             #               f'/s/{encode_url(int(kwargs['id']))}'},
+            {'short-link': request.build_absolute_uri(reverse('recipes:short-link', args=(id,))), },
             status=status.HTTP_200_OK,
         )

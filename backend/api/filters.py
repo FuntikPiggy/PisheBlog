@@ -11,14 +11,26 @@ class RecipeFilter(filters.FilterSet):
 
     tags = filters.AllValuesMultipleFilter(
         field_name='tags__slug', lookup_expr='contains',)
-    is_favorited = filters.ModelChoiceFilter(
-        queryset=User.objects.all(), field_name='favorites',)
-    is_in_shopping_cart = filters.ModelChoiceFilter(
-        queryset=User.objects.all(), field_name='purchases',)
+
+    # tags = filters.AllValuesMultipleFilter(
+    #     field_name='tags__slug', lookup_expr='contains',)
+    # is_favorited = filters.ModelChoiceFilter(
+    #     queryset=User.objects.all(), field_name='fans',)
+    # is_in_shopping_cart = filters.ModelChoiceFilter(
+    #     queryset=User.objects.all(), field_name='buyers',)
+
+    # is_favorited = filters.ModelChoiceFilter(
+    #     queryset=User.objects.all(), field_name='favorites__recipe',)
+    # is_in_shopping_cart = filters.ModelChoiceFilter(
+    #     queryset=User.objects.all(), field_name='purchases__recipe',)
+    is_favorited = filters.ModelMultipleChoiceFilter(
+        queryset=User.objects.all(), field_name='favorites__recipe_id', to_field_name='id',)
+    is_in_shopping_cart = filters.ModelMultipleChoiceFilter(
+        queryset=User.objects.all(), field_name='purchases__recipe_id', to_field_name='id',)
 
     class Meta:
         model = Recipe
-        fields = ('author',)
+        fields = ('author', 'is_favorited', 'is_in_shopping_cart',)
 
 
 class IngredientFilter(filters.FilterSet):

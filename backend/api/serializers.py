@@ -130,6 +130,7 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit', 'amount',)
+        read_only_fields = ('name', 'measurement_unit', )
 
 
 class BaseRecipeSerializer(serializers.ModelSerializer):
@@ -180,9 +181,9 @@ class RecipeInSerializer(serializers.ModelSerializer):
     )
     ingredients = serializers.SerializerMethodField(read_only=True)
     author = CustomUserSerializer(read_only=True,)
-    image = Base64ImageField(required=False, allow_null=True)
-    is_favorited = serializers.SerializerMethodField(read_only=True)
-    is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
+    image = Base64ImageField(required=False, allow_null=True,)
+    is_favorited = serializers.SerializerMethodField(read_only=True,)
+    is_in_shopping_cart = serializers.SerializerMethodField(read_only=True,)
 
     class Meta:
         model = Recipe
@@ -199,32 +200,29 @@ class RecipeInSerializer(serializers.ModelSerializer):
             'cooking_time',
         )
 
-    def create(self, validated_data):
-        tags = validated_data.pop('tags', [])
-        ingredients_amounts = self.initial_data['ingredients']
-        recipe = super().create(validated_data)
+    @staticmethod
+    def create_update(recipe, tags, ingredients_amounts):
         recipe.tags.set(tags)
-        recipeingredients = []
-        for ingredient_amount in ingredients_amounts:
-            ingredient = Ingredient.objects.get(id=ingredient_amount['id'])
-            amount = ingredient_amount['amount']
-            recipeingredients.append(RecipeIngredient(
-                ingredient=ingredient, recipe=recipe, amount=amount,
-            ))
-        RecipeIngredient.objects.bulk_create(recipeingredients)
-        return recipe
-
-    def update(self, recipe, validated_data):
-        new_tags = Tag.objects.filter(id__in=validated_data.pop('tags'))
-        recipe.tags.set(new_tags)
         recipe.ingredients.clear()
         recipeingredients = [RecipeIngredient(
             recipe=recipe,
             ingredient=Ingredient.objects.get(id=i['id']),
             amount=i['amount']
-        ) for i in validated_data.pop('ingredients')]
+        ) for i in ingredients_amounts]
         RecipeIngredient.objects.bulk_create(recipeingredients)
-        return super().update(recipe, validated_data)
+        return recipe
+
+    def create(self, validated_data):
+        tags = validated_data.pop('tags', [])
+        ingredients_amounts = self.initial_data.pop('ingredients')
+        recipe = super().create(validated_data)
+        return self.create_update(recipe, tags, ingredients_amounts)
+
+    def update(self, recipe, validated_data):
+        tags = validated_data.pop('tags', [])
+        ingredients_amounts = self.initial_data.pop('ingredients')
+        super().update(recipe, validated_data)
+        return self.create_update(recipe, tags, ingredients_amounts)
 
     def get_ingredients(self, recipe):
         recipe_ingredients = {
