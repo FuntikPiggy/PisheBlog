@@ -19,14 +19,19 @@ class RecipeFilter(filters.FilterSet):
     # is_in_shopping_cart = filters.ModelChoiceFilter(
     #     queryset=User.objects.all(), field_name='buyers',)
 
+    is_favorited = filters.ModelChoiceFilter(
+        queryset=User.objects.all(), field_name='favorites__user_id',)
+    is_in_shopping_cart = filters.ModelChoiceFilter(
+        queryset=User.objects.all(), field_name='purchases__user_id',)
+
     # is_favorited = filters.ModelChoiceFilter(
     #     queryset=User.objects.all(), field_name='favorites__recipe',)
     # is_in_shopping_cart = filters.ModelChoiceFilter(
     #     queryset=User.objects.all(), field_name='purchases__recipe',)
-    is_favorited = filters.ModelMultipleChoiceFilter(
-        queryset=User.objects.all(), field_name='favorites__recipe_id', to_field_name='id',)
-    is_in_shopping_cart = filters.ModelMultipleChoiceFilter(
-        queryset=User.objects.all(), field_name='purchases__recipe_id', to_field_name='id',)
+    # is_favorited = filters.ModelMultipleChoiceFilter(
+    #     queryset=User.objects.all(), field_name='favorites__recipe_id', to_field_name='id',)
+    # is_in_shopping_cart = filters.ModelMultipleChoiceFilter(
+    #     queryset=User.objects.all(), field_name='purchases__recipe_id', to_field_name='id',)
 
     class Meta:
         model = Recipe

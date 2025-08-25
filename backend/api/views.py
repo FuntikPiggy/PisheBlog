@@ -1,7 +1,8 @@
 # from functools import wraps
 
 from django.contrib.auth import get_user_model
-from django.db.models import F
+from django.db.models import F, Sum, Value
+from django.db.models.functions import Concat
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
@@ -16,7 +17,7 @@ from short_url import encode_url, decode_url
 
 from recipes.models import Tag, Ingredient, Recipe, Favorite, Purchase, Followings
 from .filters import RecipeFilter, IngredientFilter
-from .permissions import IsAuthorOrStaff, SelfOrStaffOrReadOnly
+from .permissions import AuthorOrReadOnly
 from .serializers import (TagSerializer, IngredientSerializer,
                           RecipeInSerializer, UserSubscriptionsSerializer,
                           CustomUserSerializer,
@@ -142,7 +143,7 @@ class RecipeViewSet(ModelViewSet):
     """Представление модели рецепта."""
 
     http_method_names = ('get', 'post', 'patch', 'delete',)
-    permission_classes = (IsAuthenticatedOrReadOnly | SelfOrStaffOrReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly | AuthorOrReadOnly,)
     queryset = Recipe.objects.all().prefetch_related(
         'ingredients', 'recipeingredients', 'tags', 'author')
     serializer_class = BaseRecipeSerializer
@@ -228,21 +229,39 @@ class RecipeViewSet(ModelViewSet):
             permission_classes=(IsAuthenticated,),)
     def download_shopping_cart(self, request, *args, **kwargs):
         """Метод вывода списка покупок в файл."""
-        all_ingredients = request.user.shopping_cart.prefetch_related(
-            'ingredients', 'recipeingredients').values(
-            ing_name=F('ingredients__name'),
-            ing_amount=F('recipeingredients__amount'),
-            ing_m_unit=F('ingredients__measurement_unit')
-        )
-        ingredients = dict()
-        for ingredient in all_ingredients:
-            ingredients.setdefault(
-                (ingredient['ing_name'], ingredient['ing_m_unit']), []
-            ).append(ingredient['ing_amount'])
-        ingredients = [
-            (k[0], f'{sum(v)} {k[1]}') for k, v in ingredients.items()
-        ]
-        return save_shopping_file(ingredients)
+        # all_ingredients = request.user.shopping_cart.prefetch_related(
+        #     'ingredients', 'recipeingredients').values(
+        #     ing_name=F('ingredients__name'),
+        #     ing_amount=F('recipeingredients__amount'),
+        #     ing_m_unit=F('ingredients__measurement_unit')
+        # )
+        ingredients = request.user.purchases.prefetch_related(
+            'recipe', 'recipe__ingredients', 'recipe__recipeingredients',).values(
+            name=F('recipe__ingredients__name'),
+            m_unit=F('recipe__ingredients__measurement_unit'),
+        ).annotate(amount=Sum('recipe__recipeingredients__amount'),)
+        recipes = request.user.purchases.prefetch_related('recipe', 'recipe__author').values(
+            name=F('recipe__name'),
+            author=Concat(
+                'recipe__author__first_name',
+                Value(' '),
+                'recipe__author__last_name',
+            ),)
+        # all_ingredients = request.user.purchases.prefetch_related(
+        #     'recipe',).values(
+        #     ing_name=F('ingredients__name'),
+        #     # ing_amount=F('recipeingredients__amount'),
+        #     ing_m_unit=F('ingredients__measurement_unit')
+        # ).annotate(ing_amount=Sum('recipe__ingredients__amount'),)
+        # ingredients = dict()
+        # for ingredient in all_ingredients:
+        #     ingredients.setdefault(
+        #         (ingredient['ing_name'], ingredient['ing_m_unit']), []
+        #     ).append(ingredient['ing_amount'])
+        # ingredients = [
+        #     (k[0], f'{sum(v)} {k[1]}') for k, v in ingredients.items()
+        # ]
+        return save_shopping_file(ingredients, recipes)
 
     @action(('get',), url_path='get-link',
             detail=True, permission_classes=(AllowAny,),)
@@ -250,6 +269,8 @@ class RecipeViewSet(ModelViewSet):
         """Метод получения короткой ссылки."""
         get_object_or_404(Recipe, id=id)
         return Response(
-            {'short-link': request.build_absolute_uri(reverse('recipes:short-link', args=(id,))), },
+            {'short-link': request.build_absolute_uri(
+                reverse('recipes:short-link', args=(id,)),
+            ), },
             status=status.HTTP_200_OK,
         )
