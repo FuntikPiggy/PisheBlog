@@ -138,14 +138,6 @@ dmypy.json
 .idea
 .vscode
 
-
+static/
 media/
-2025-08-11__01__plan.xlsx
-.frontend
-/infra/.env_test
-/temp_front/
-/backend__temp/
-/temp_front/
-/infra/
-/2025-08-11__01__FoodGram_plan.xlsx
-/data/
+temp_front/

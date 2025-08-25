@@ -16,8 +16,8 @@ RECIPE_NAME_LENGTH = 256
 INGREDIENTS_DB_NAME = 'recipes_ingredient'
 TAGS_DB_NAME = 'recipes_tag'
 # Имена файлов с данными
-INGREDIENTS_FILE_NAME = 'ingredients'
-TAGS_FILE_NAME = 'tags'
+INGREDIENTS_FILE_NAME = 'recipes_ingredient'
+TAGS_FILE_NAME = 'recipes_tag'
 
 # Сообщения
 USERNAME_VALID = 'Используются только буквы, цифры и символы @/./+/-/_ .'
