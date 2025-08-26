@@ -5,7 +5,7 @@ from django.db.models import Sum, Count
 class SubsFilterBase(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
-        return [(1, 'Да'), (0, 'Нет'),]
+        return [(1, 'Да'), (0, 'Нет')]
 
     def queryset(self, request, queryset):
         if self.value() == '1':

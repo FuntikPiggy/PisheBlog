@@ -14,11 +14,11 @@ def save_shopping_file(ingredients, recipes):
 
         *[f' {n:02}.{i["name"].capitalize():.<{i["length"]}}'
           f'{i["amount"]}{i["m_unit"]}'
-          for n, i in enumerate(ingredients)],
+          f'' for n, i in enumerate(ingredients)],
 
         '\nРецепты:',
-        *[f' {r['name'][:30]:.<{r["length"]}}({r['author']})'
-          for r in recipes],
+        *[f' {r['name'][:30]:.<{r["length"]}}({r['author']}'
+          f')' for r in recipes],
 
     ])
     return HttpResponse(shopping, content_type='text/plain')
