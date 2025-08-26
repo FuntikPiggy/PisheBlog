@@ -142,3 +142,8 @@ dmypy.json
 #static/
 media/
 temp_front/
+/backend/recipes/management/commands/json2db.py
+./data/
+/2025-08-11__01__FoodGram_plan.xlsx
+/backend__temp/
+/.github/workflows/main_temp.yml
