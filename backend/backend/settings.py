@@ -25,15 +25,18 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'debug_toolbar',
     'rest_framework',
-    'rest_framework.authtoken',
     'djoser',
+    'rest_framework.authtoken',
+    'corsheaders',
     'django_filters',
     'recipes.apps.RecipesConfig',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -46,6 +49,11 @@ CSRF_TRUSTED_ORIGINS=os.getenv('CSRF_TRUSTED', 'http://localhost').split()
 
 INTERNAL_IPS = [
     '127.0.0.1',
+]
+
+CORS_URLS_REGEX = r'^/api/.*$'
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
 ]
 
 
@@ -75,7 +83,7 @@ DB_TYPE_POSTGRES = {
     'USER': os.getenv('POSTGRES_USER', 'django'),
     'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
     'HOST': os.getenv('DB_HOST', ''),
-    'PORT': os.getenv('DB_PORT', 5430)
+    'PORT': os.getenv('DB_PORT', 5432)
 }
 DB_TYPE_SQLITE = {
     'ENGINE': 'django.db.backends.sqlite3',
@@ -123,15 +131,28 @@ STATIC_ROOT = BASE_DIR / 'collected_static'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-AUTH_USER_MODEL = 'recipes.FgUser'
+AUTH_USER_MODEL = 'recipes.FoodgramUser'
 
 
 DJOSER = {
     'SERIALIZERS': {'user': 'api.serializers.CustomUserSerializer',
                     'current_user': 'api.serializers.CustomUserSerializer',},
+    'PERMISSIONS': {
+        'activation': ['rest_framework.permissions.AllowAny'],
+        'password_reset': ['rest_framework.permissions.AllowAny'],
+        'password_reset_confirm': ['rest_framework.permissions.AllowAny'],
+        'set_password': ['djoser.permissions.CurrentUserOrAdmin'],
+        'username_reset': ['rest_framework.permissions.AllowAny'],
+        'username_reset_confirm': ['rest_framework.permissions.AllowAny'],
+        'set_username': ['djoser.permissions.CurrentUserOrAdmin'],
+        'user_create': ['rest_framework.permissions.AllowAny'],
+        'user_delete': ['djoser.permissions.CurrentUserOrAdmin'],
+        'user': ['rest_framework.permissions.AllowAny'],
+        'user_list': ['rest_framework.permissions.AllowAny'],
+    },
     'HIDE_USERS': False,
 }
 

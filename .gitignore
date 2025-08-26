@@ -140,13 +140,11 @@ dmypy.json
 
 
 media/
-2025-08-11__01__plan.xlsx
-.frontend
-/infra/.env_test
-/temp_front/
-/backend__temp/
-/temp_front/
-/infra/
+temp_front/
+/backend/recipes/management/commands/json2db.py
+./data/
 /2025-08-11__01__FoodGram_plan.xlsx
-/data/
+/backend__temp/
+/.github/workflows/main_temp.yml
+./db/
 /.README.md
