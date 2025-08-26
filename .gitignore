@@ -147,3 +147,4 @@ temp_front/
 /2025-08-11__01__FoodGram_plan.xlsx
 /backend__temp/
 /.github/workflows/main_temp.yml
+./db/
