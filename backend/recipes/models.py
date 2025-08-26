@@ -20,9 +20,9 @@ class FoodgramUser(AbstractUser):
         max_length=constants.USERNAME_LENGTH,
         unique=True,
         validators=(RegexValidator(
-            regex = USERNAME_REGEX,
+            regex=USERNAME_REGEX,
             message=USERNAME_VALID,
-            flags = re.ASCII
+            flags=re.ASCII
         ),),
         verbose_name='Псевдоним',
         help_text=USERNAME_VALID,
@@ -59,6 +59,7 @@ class FoodgramUser(AbstractUser):
                 f'{self.last_name[:64]=} '
                 f'{self.email[:64]=}')
 
+    # Ниже методы для отображений в админ-панели
     def get_avatar(self):
         if not self.avatar:
             return '/static/recipes/admin/ava_default.jpg'
@@ -139,6 +140,8 @@ class Recipe(models.Model):
     )
     cooking_time = models.PositiveIntegerField(
         verbose_name='Время приготовления',
+        null=False,
+        blank=False,
         validators=(
             MinValueValidator(1),
         )
@@ -150,8 +153,8 @@ class Recipe(models.Model):
     )
     image = models.ImageField(
         upload_to='recipes/images/',
-        null=True,
-
+        null=False,
+        blank=False,
         default=None,
         verbose_name='Изображение',
     )
@@ -181,6 +184,7 @@ class Recipe(models.Model):
                 f'{self.pub_date=}'
                 f'{self.tags=} ')
 
+    # Ниже методы для отображений в админ-панели
     def get_image(self):
         if not self.image:
             return '/static/recipes/admin/not-found.png'
@@ -194,19 +198,17 @@ class Recipe(models.Model):
 
     @mark_safe
     def ingredients_ul(self):
-        return f'<ul>{"".join([f"<li>{i.name}</li>" for i in self.ingredients.all()])}</ul>'
+        return f'<ul>{"".join([f"<li>{i.name}</li>"
+                               for i in self.ingredients.all()])}</ul>'
 
     ingredients_ul.short_description = 'Ингредиенты'
 
     @mark_safe
     def tags_ul(self):
-        return f'<ul>{"".join([f"<li>{i.name}</li>" for i in self.tags.all()])}</ul>'
+        return f'<ul>{"".join([f"<li>{i.name}</li>"
+                               for i in self.tags.all()])}</ul>'
 
     tags_ul.short_description = 'Тэги'
-
-    # @property
-    # def in_shopping_cart(self, user):
-    #     return user.purchases.filter(user_id=user.id, recipe_id=self.id).exists()
 
 
 class RecipeIngredient(models.Model):
@@ -230,7 +232,6 @@ class RecipeIngredient(models.Model):
     )
 
     class Meta:
-        auto_created = True
         default_related_name = 'recipeingredients'
         verbose_name = 'ингредиент'
         verbose_name_plural = 'Ингредиенты'
@@ -276,8 +277,16 @@ class Purchase(UserFavoriteBase):
 
 
 class Followings(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subscriptions')
-    following = models.ForeignKey(User, on_delete=models.CASCADE, related_name='followers')
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='subscriptions'
+    )
+    following = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='followers'
+    )
 
     class Meta:
         constraints = (

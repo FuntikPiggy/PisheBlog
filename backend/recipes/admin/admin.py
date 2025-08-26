@@ -27,12 +27,12 @@ class RecipesCountMixin(admin.ModelAdmin):
 class FoodgramUserAdmin(RecipesCountMixin, UserAdmin):
     """Настройки раздела пользователей админ-панели."""
 
-    list_display = ('id', 'username', 'full_name',
-              'avatar_small', 'email', 'recipes_count',
-              'subscriptions_count', 'followers_count',)
+    list_display = ('id', 'username', 'full_name', 'avatar_small', 'email',
+                    'recipes_count', 'subscriptions_count', 'followers_count',)
     list_display_links = ('id', 'username', 'full_name',)
     ordering = ('last_name',)
-    readonly_fields = ('full_name', 'recipes_count', 'subscriptions_count', 'followers_count',)
+    readonly_fields = ('full_name', 'recipes_count',
+                       'subscriptions_count', 'followers_count',)
     list_filter = (HasRecipes, HasSubscriptions, HasFollowers, )
     list_per_page = 8
 
@@ -55,6 +55,7 @@ class TagAdmin(RecipesCountMixin, admin.ModelAdmin):
 
     list_display = ('name', 'slug', 'recipes_count',)
     search_fields = ('name', 'slug',)
+
 
 @admin.register(Ingredient)
 class IngredientAdmin(RecipesCountMixin, admin.ModelAdmin):
@@ -87,7 +88,7 @@ class RecipeAdmin(admin.ModelAdmin):
         TagsInline,
         IngredientInline,
     ]
-    filter_horizontal = ('tags', 'ingredients',)
+    filter_horizontal = ('tags', )
     list_per_page = 7
 
     @admin.display(description='В избранном',)

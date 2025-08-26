@@ -10,9 +10,9 @@ class SubsFilterBase(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         if self.value() == '1':
             return queryset.filter(
-                **{f'{self.parameter_name}__isnull':False}).distinct()
+                **{f'{self.parameter_name}__isnull': False}).distinct()
         elif self.value() == '0':
-            return queryset.filter(**{f'{self.parameter_name}__isnull':True})
+            return queryset.filter(**{f'{self.parameter_name}__isnull': True})
 
 
 class HasRecipes(SubsFilterBase):
@@ -47,11 +47,10 @@ class CookTimeFilter(admin.SimpleListFilter):
     def __init__(self, *args, **kwargs):
         queryset = args[2].objects.all()
         self.n = max(20, int(queryset.aggregate(
-            time=Sum('cooking_time')/Count('cooking_time')
+            time=Sum('cooking_time') / Count('cooking_time')
         )['time'] / 3 * 2 / 5 + 0.5) * 5)
         self.m = self.n * 2
         super().__init__(*args, **kwargs)
-
 
     def lookups(self, request, model_admin):
         return [
@@ -64,6 +63,6 @@ class CookTimeFilter(admin.SimpleListFilter):
         if self.value() == '0':
             return queryset.filter(cooking_time__lt=self.n)
         elif self.value() == '1':
-            return queryset.filter(cooking_time__range=(self.n,self.m))
+            return queryset.filter(cooking_time__range=(self.n, self.m))
         elif self.value() == '2':
             return queryset.filter(cooking_time__gt=self.m)

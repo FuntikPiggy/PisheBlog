@@ -30,7 +30,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_filters',
     'recipes.apps.RecipesConfig',
-    # 'drf_yasg',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [

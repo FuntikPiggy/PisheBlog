@@ -139,6 +139,6 @@ dmypy.json
 .idea
 .vscode
 
-static/
+#static/
 media/
 temp_front/

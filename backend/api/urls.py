@@ -3,7 +3,8 @@ from django.conf.urls.static import static
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import TagViewSet, IngredientViewSet, RecipeViewSet, FoodgramUserViewSet
+from .views import (TagViewSet, IngredientViewSet,
+                    RecipeViewSet, FoodgramUserViewSet)
 
 app_name = 'api'
 
@@ -15,7 +16,6 @@ router.register('recipes', RecipeViewSet, basename='recipe')
 
 
 urlpatterns = [
-    # path('', include('djoser.urls')),
     path('', include(router.urls)),
     path('auth/', include('djoser.urls.authtoken')),
 ]

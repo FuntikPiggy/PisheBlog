@@ -1,3 +1,4 @@
+# flake8: noqa
 from .admin import FoodgramUserAdmin as FoodgramUserAdmin
 from .admin import TagAdmin as TagAdmin
 from .admin import IngredientAdmin as IngredientAdmin
