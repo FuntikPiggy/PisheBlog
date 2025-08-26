@@ -139,6 +139,8 @@ class Recipe(models.Model):
     )
     cooking_time = models.PositiveIntegerField(
         verbose_name='Время приготовления',
+        null=False,
+        blank=False,
         validators=(
             MinValueValidator(1),
         )
@@ -150,8 +152,8 @@ class Recipe(models.Model):
     )
     image = models.ImageField(
         upload_to='recipes/images/',
-        null=True,
-
+        null=False,
+        blank=False,
         default=None,
         verbose_name='Изображение',
     )
@@ -230,7 +232,6 @@ class RecipeIngredient(models.Model):
     )
 
     class Meta:
-        auto_created = True
         default_related_name = 'recipeingredients'
         verbose_name = 'ингредиент'
         verbose_name_plural = 'Ингредиенты'

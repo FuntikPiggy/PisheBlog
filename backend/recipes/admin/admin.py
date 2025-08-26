@@ -87,7 +87,7 @@ class RecipeAdmin(admin.ModelAdmin):
         TagsInline,
         IngredientInline,
     ]
-    filter_horizontal = ('tags', 'ingredients',)
+    filter_horizontal = ('tags', )
     list_per_page = 7
 
     @admin.display(description='В избранном',)
