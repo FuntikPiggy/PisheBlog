@@ -115,6 +115,10 @@ jobs:
             sudo docker compose -f docker-compose.yml exec backend python manage.py collectstatic
             sudo docker compose -f docker-compose.yml exec backend cp -r /app/collected_static/. /backend_static/static/
             sudo docker compose -f docker-compose.yml exec backend cp -r /app/data/images/. /app/media/
+#            Для продакшена:
+#            sudo docker compose -f docker-compose.yml exec backend python manage.py ing2db
+#            sudo docker compose -f docker-compose.yml exec backend python manage.py tag2db
+#            Для меня:
             sudo docker compose -f docker-compose.yml exec backend python manage.py loaddata ./data/indented_db.json
             
 
