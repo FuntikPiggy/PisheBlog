@@ -12,6 +12,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         get_json(INGREDIENTS_FILE_NAME, INGREDIENTS_DB_NAME)
 
+
 if __name__ == '__main__':
     command1 = Command()
     command1.handle()
