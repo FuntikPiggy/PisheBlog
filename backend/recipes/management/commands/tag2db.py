@@ -1,16 +1,13 @@
-from django.core.management import BaseCommand
-
-from recipes.constants import TAGS_DB_NAME, TAGS_FILE_NAME
-from recipes.management.base2db import get_json
+from recipes.management.base2db import GetDataFromFileBase
+from recipes.models import Tag
 
 
-class Command(BaseCommand):
-    """Класс команды на вставку данных из json в БД"""
+class Command(GetDataFromFileBase):
+    """Класс команды на вставку данных тэгов из json в БД"""
 
     help = 'Импорт ингредиентов из json-файла в БД'
-
-    def handle(self, *args, **options):
-        get_json(TAGS_FILE_NAME, TAGS_DB_NAME)
+    filename = 'recipes_tag'
+    klass = Tag
 
 
 if __name__ == '__main__':

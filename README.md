@@ -3,16 +3,16 @@
 # FoodGram
 
 **********
-## [О проекте.](#anchor-about)<br/>
+## [О проекте.](#anchor-about)
 **********
-## [Как запустить проект в контейнерах Docker.](#How-to-run-Docker)<br/>
+## [Как запустить проект в контейнерах Docker.](#How-to-run-Docker)
 **********
-## [Как запустить проект локально, без Docker.](#How-to-run-w/o-Docker)<br/>
-#### [Запуск фронтенда проекта.](#Run-front)<br/>
-#### [Запуск базы данных проекта.](#Run-db)<br/>
-#### [Запуск бэкэнда проекта.](#Run-back)<br/>
+## [Как запустить проект локально, без Docker.](#How-to-run-w/o-Docker)
+#### [Запуск фронтенда проекта.](#Run-front)
+#### [Запуск базы данных проекта.](#Run-db)
+#### [Запуск бэкэнда проекта.](#Run-back)
 **********
-<br/>
+
 
 <a name="anchor-about"></a>
 ## О проекте
@@ -157,11 +157,7 @@ CSRF_TRUSTED='<https://subdomain.example.com>'  # Ваш адрес
 
 <a name="Run-front"></a>
 ### Запуск фронтенда проекта:
-Установите Node.js версии v24.1.0, используя дистрибутивы и инструкции с [официального сайта проекта](https://nodejs.org/en/about/previous-releases#looking-for-latest-release-of-a-version-branch).
-После установки, проверьте, появился ли npm на вашем компьютере. Выполните в терминале команду:
-
-```
-npm -v
+Установите [Node.js](https://nodejs.org/en/about/previous-releases#looking-for-latest-release-of-a-version-branch) версии v24.1.0.
 ```
 
 Перейдите в директорию "frontend" проекта:
@@ -193,16 +189,10 @@ npm run start
 ### Запуск базы данных проекта:
 
 Создать БД [Postgres](https://www.postgresql.org/download/windows/):
-Войти в консоль postgres, введя пароль пользователя (указывали при установке): 
+Находясь в папке backend (где лежит файл manage.py), введите команду: 
 
 ```
-psql -U postgres
-```
-
-Создать БД: 
-
-```
-CREATE DATABASE django;
+python manage.py migrate
 ```
 
 Создать пользователя и наделить его правами:
@@ -281,6 +271,4 @@ python manage.py runserver
 [Главная страница сайта](http://127.0.0.1:3000/)
 [Админ-панель](http://127.0.0.1:8000/admin/)
 [API-панель](http://127.0.0.1:8000/api/)
-[Документация ReDoc](http://127.0.0.1:8000/redoc/)
-[Документация Swagger](http://127.0.0.1:8000/swagger/)
 ```

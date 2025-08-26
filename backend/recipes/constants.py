@@ -12,12 +12,5 @@ TAG_SLUG_LENGTH = TAG_NAME_LENGTH
 INGREDIENT_NAME_LENGTH = 128
 INGREDIENT_MEASURE_LENGTH = 64
 RECIPE_NAME_LENGTH = 256
-# Имена таблиц БД
-INGREDIENTS_DB_NAME = 'recipes_ingredient'
-TAGS_DB_NAME = 'recipes_tag'
-# Имена файлов с данными
-INGREDIENTS_FILE_NAME = 'recipes_ingredient'
-TAGS_FILE_NAME = 'recipes_tag'
-
 # Сообщения
 USERNAME_VALID = 'Используются только буквы, цифры и символы @/./+/-/_ .'
