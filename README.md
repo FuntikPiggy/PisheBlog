@@ -189,7 +189,7 @@ npm i
 npm run start
 ```
 
-<a name="Run-bd"></a>
+<a name="Run-db"></a>
 ### Запуск базы данных проекта:
 
 Создать БД [Postgres](https://www.postgresql.org/download/windows/):
