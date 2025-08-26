@@ -198,21 +198,15 @@ class Recipe(models.Model):
 
     @mark_safe
     def ingredients_ul(self):
-        return (f'<ul>'
-                f'{"".join([f"<li>"
-                            f"{i.name}"
-                            f"</li>" for i in self.ingredients.all()])}'
-                f'</ul>')
+        ul = "".join([f"<li>{i.name}</li>" for i in self.ingredients.all()])
+        return f'<ul>{ul}</ul>'
 
     ingredients_ul.short_description = 'Ингредиенты'
 
     @mark_safe
     def tags_ul(self):
-        return (f'<ul>'
-                f'{"".join([f"<li>"
-                            f"{i.name}"
-                            f"</li>" for i in self.tags.all()])}'
-                f'</ul>')
+        ul = "".join([f"<li>{i.name}</li>" for i in self.tags.all()])
+        return f'<ul>{ul}</ul>'
 
     tags_ul.short_description = 'Тэги'
 

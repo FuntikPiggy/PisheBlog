@@ -151,4 +151,8 @@ media/
 /.README.md
 ./db/
 ./data/
+db/
+data/
 ./temp_front/
+temp_front/
+/backend/api/shopping_pretty.py

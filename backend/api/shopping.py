@@ -17,7 +17,7 @@ def save_shopping_file(ingredients, recipes):
           f'' for n, i in enumerate(ingredients)],
 
         '\nРецепты:',
-        *[f' {r['name'][:30]:.<{r["length"]}}({r['author']}'
+        *[f' {r["name"][:30]:.<{r["length"]}}({r["author"]}'
           f')' for r in recipes],
 
     ])
