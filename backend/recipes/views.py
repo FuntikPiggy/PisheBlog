@@ -1,9 +1,11 @@
-from django.shortcuts import redirect, get_object_or_404
+from django.http import Http404
+from django.shortcuts import redirect
 
 from recipes.models import Recipe
 
 
 def short_link(request, recipe_id):
     """Функция представления для декодирования коротких ссылок."""
-    get_object_or_404(Recipe, id=recipe_id)
+    if not Recipe.objects.filter(id=recipe_id).exists():
+        raise Http404('Такого рецепта в базе нет')
     return redirect(f'/recipes/{recipe_id}')

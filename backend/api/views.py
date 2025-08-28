@@ -18,7 +18,6 @@ from recipes.models import (Tag, Ingredient, Recipe,
 from .filters import RecipeFilter, IngredientFilter
 from .permissions import AuthorOrReadOnly
 from .serializers import (TagSerializer, IngredientSerializer,
-                          # RecipeInSerializer,
                           UserSubscriptionsSerializer,
                           FoodgramUserSerializer,
                           BriefRecipeSerializer, RecipeSerializer,
@@ -40,21 +39,11 @@ class FoodgramUserViewSet(UserViewSet):
     def subscribe(self, request, *args, **kwargs):
         """Метод подписки."""
         if request.method == 'DELETE':
-            # subscribe = Subscription.objects.filter(
-            #     user=request.user, author=author)
-            # if not subscribe.exists():
-            #     return Response(status=status.HTTP_400_BAD_REQUEST)
-            # subscribe.delete()
             get_object_or_404(
                 Subscription, user=request.user, author=kwargs['id']
             ).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-
         author = get_object_or_404(User, id=kwargs['id'])
-        # serializer = SubscriptionSerializer(
-        #     data={'user': request.user.id, 'author': author.id})
-        # if serializer.is_valid(raise_exception=True):
-        #     serializer.save()
         data = dict(user=request.user, author=author)
         if (Subscription.objects.filter(**data).exists()
                 or request.user == author):
@@ -136,17 +125,6 @@ class RecipeViewSet(ModelViewSet):
     filterset_class = RecipeFilter
     lookup_url_kwarg = 'id'
 
-    # def get_serializer_context(self):
-    #     return {
-    #         'request': self.request,
-    #         'queryset': self.queryset,
-    #     }
-
-    # def get_serializer_class(self, *args, **kwargs):
-    #     if self.action in ('create', 'partial_update'):
-    #         return RecipeInSerializer
-    #     return self.serializer_class
-
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
@@ -154,21 +132,12 @@ class RecipeViewSet(ModelViewSet):
     def favorite_shopping_base(request, klass, queryset, id):
         """Базовый метод для методов добавления в избранное и корзину>."""
         if request.method == 'DELETE':
-            # klass_obj = klass.objects.filter(user=request.user, recipe=recipe)
-            # if not klass_obj.exists():
-            #     return Response(status=status.HTTP_400_BAD_REQUEST)
-            # klass_obj.delete()
             get_object_or_404(klass, user=request.user, recipe=id).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-
         recipe = get_object_or_404(Recipe, id=id)
-        # serializer = serializer(
-        #     data={'user': request.user.id, 'recipe': id})
-        # if serializer.is_valid(raise_exception=True):
-        #     serializer.save()
         data = dict(user=request.user, recipe=recipe)
         if klass.objects.filter(**data).exists():
-            raise ValidationError()
+            raise ValidationError('Такой рецепт уже добавлен!')
         queryset.add(klass(**data), bulk=False)
         return Response(
             BriefRecipeSerializer(
