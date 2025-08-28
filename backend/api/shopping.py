@@ -2,8 +2,10 @@ from datetime import datetime
 
 from django.http import FileResponse
 
+
 PRODUCTS = ' {:02}.{} - {}{}'
 RECIPES = ' {} ({} {})'
+
 
 def save_shopping_file(ingredients, recipes):
     shopping = '\n'.join([
@@ -12,7 +14,7 @@ def save_shopping_file(ingredients, recipes):
         '\nПродукты:',
 
         *[PRODUCTS.format(
-            n+1,
+            n + 1,
             i["name"].capitalize(),
             i["amount"],
             i["m_unit"]

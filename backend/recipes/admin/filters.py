@@ -75,7 +75,8 @@ class CookTimeFilter(admin.SimpleListFilter):
         if self.value() == '0':
             return queryset.filter(cooking_time__lt=self.lower_limit)
         elif self.value() == '1':
-            return queryset.filter(cooking_time__range=(self.lower_limit, self.upper_limit))
+            return queryset.filter(cooking_time__range=(
+                self.lower_limit, self.upper_limit))
         elif self.value() == '2':
             return queryset.filter(cooking_time__gt=self.upper_limit)
         return queryset

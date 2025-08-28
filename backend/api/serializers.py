@@ -99,7 +99,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         required_fields = ('cooking_time',)
 
     def to_representation(self, recipe):
-        amounts = dict(recipe.recipeingredients.values_list('ingredient_id', 'amount',))
+        amounts = dict(recipe.recipeingredients.values_list(
+            'ingredient_id', 'amount',))
         recipe = super().to_representation(recipe)
         for ingredient in recipe['ingredients']:
             ingredient['amount'] = amounts[ingredient['id']]
@@ -144,7 +145,8 @@ class RecipeSerializer(serializers.ModelSerializer):
                            for i in ingredients_amounts)):
             raise serializers.ValidationError('Проверьте ингредиенты')
         if (len(tag_ids) != len(set(tag_ids)) or len(tag_ids) == 0
-                or not all(Tag.objects.filter(id=i).exists() for i in tag_ids)):
+                or not all(Tag.objects.filter(id=i).exists()
+                           for i in tag_ids)):
             raise serializers.ValidationError('Проверьте теги')
         return tag_ids, ingredients_amounts
 

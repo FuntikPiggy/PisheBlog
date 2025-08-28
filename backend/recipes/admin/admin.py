@@ -156,7 +156,8 @@ class RecipeAdmin(IngrediensListMixin, admin.ModelAdmin):
 class SubscriptionAdmin(admin.ModelAdmin):
     """Настройки раздела Подписки админ-панели."""
 
-    list_display = ('id', 'subsription_name', 'user_name_id', 'author_name_id',)
+    list_display = ('id', 'subsription_name',
+                    'user_name_id', 'author_name_id',)
     list_display_links = ('id', 'subsription_name',)
     search_fields = ('user__last_name', 'user__first_name', )
     ordering = ('user__last_name',)
