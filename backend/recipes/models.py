@@ -5,10 +5,10 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator, MinValueValidator
 from django.db import models
 from django.db.models import ForeignKey
-from django.utils.safestring import mark_safe
 
 from . import constants
-from .constants import USERNAME_VALID, USERNAME_REGEX
+from .constants import (USERNAME_VALID, USERNAME_REGEX,
+                        MIN_COOK_TIME, MIN_AMOUNT)
 
 
 class FoodgramUser(AbstractUser):
@@ -59,24 +59,12 @@ class FoodgramUser(AbstractUser):
                 f'{self.last_name[:64]=} '
                 f'{self.email[:64]=}')
 
-    # Ниже методы для отображений в админ-панели
-    def get_avatar(self):
-        if not self.avatar:
-            return '/static/recipes/admin/ava_default.jpg'
-        return self.avatar.url
-
-    @mark_safe
-    def avatar_small(self):
-        return f'<img src="{self.get_avatar()}" width="35" height="35" />'
-
-    avatar_small.short_description = 'Аватар'
-
 
 User = get_user_model()
 
 
 class Tag(models.Model):
-    """Модель тэга, таблица recipes_tag."""
+    """Модель тега, таблица recipes_tag."""
 
     name = models.CharField(
         max_length=constants.TAG_NAME_LENGTH,
@@ -91,17 +79,17 @@ class Tag(models.Model):
     )
 
     class Meta:
-        verbose_name = 'тэг'
-        verbose_name_plural = 'Тэги'
+        verbose_name = 'тег'
+        verbose_name_plural = 'Теги'
         ordering = ('name',)
 
     def __str__(self):
-        return (f'{self.name[:32]=} '
+        return (f'{self.name=} '
                 f'{self.slug=}')
 
 
 class Ingredient(models.Model):
-    """Модель ингредиента, таблица recipes_ingredient."""
+    """Модель продукта, таблица recipes_ingredient."""
 
     name = models.CharField(
         max_length=constants.INGREDIENT_NAME_LENGTH,
@@ -143,7 +131,7 @@ class Recipe(models.Model):
         null=False,
         blank=False,
         validators=(
-            MinValueValidator(1),
+            MinValueValidator(MIN_COOK_TIME),
         )
     )
     author = ForeignKey(
@@ -161,11 +149,11 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient,
         through='RecipeIngredient',
-        verbose_name='Ингредиенты',
+        verbose_name='Продукты',
     )
     tags = models.ManyToManyField(
         Tag,
-        verbose_name='Тэги',
+        verbose_name='Теги',
     )
     pub_date = models.DateTimeField(
         auto_now_add=True,
@@ -184,35 +172,9 @@ class Recipe(models.Model):
                 f'{self.pub_date=}'
                 f'{self.tags=} ')
 
-    # Ниже методы для отображений в админ-панели
-    def get_image(self):
-        if not self.image:
-            return '/static/recipes/admin/not-found.png'
-        return self.image.url
-
-    @mark_safe
-    def image_small(self):
-        return f'<img src="{self.get_image()}" width="50" height="50" />'
-
-    image_small.short_description = 'Изображение'
-
-    @mark_safe
-    def ingredients_ul(self):
-        ul = "".join([f"<li>{i.name}</li>" for i in self.ingredients.all()])
-        return f'<ul>{ul}</ul>'
-
-    ingredients_ul.short_description = 'Ингредиенты'
-
-    @mark_safe
-    def tags_ul(self):
-        ul = "".join([f"<li>{i.name}</li>" for i in self.tags.all()])
-        return f'<ul>{ul}</ul>'
-
-    tags_ul.short_description = 'Тэги'
-
 
 class RecipeIngredient(models.Model):
-    """Модель связи рецепта и ингредиента, таблица recipes_recipeingredient."""
+    """Модель связи рецепта и продукта, таблица recipes_recipeingredient."""
 
     recipe = models.ForeignKey(
         Recipe,
@@ -226,15 +188,15 @@ class RecipeIngredient(models.Model):
     )
     amount = models.PositiveSmallIntegerField(
         validators=(
-            MinValueValidator(1),
+            MinValueValidator(MIN_AMOUNT),
         ),
         verbose_name='Количество',
     )
 
     class Meta:
         default_related_name = 'recipeingredients'
-        verbose_name = 'ингредиент'
-        verbose_name_plural = 'Ингредиенты'
+        verbose_name = 'продукт'
+        verbose_name_plural = 'Продукты'
 
     def __str__(self):
         return (f'{self.recipe.name[:32]=} '
@@ -249,8 +211,13 @@ class UserFavoriteBase(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
+        verbose_name='Пользователь',
     )
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,)
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name='Рецепт',
+    )
 
     class Meta:
         abstract = True
@@ -270,29 +237,39 @@ class UserFavoriteBase(models.Model):
 class Favorite(UserFavoriteBase):
     """Модель связи пользователя и рецепта, таблица recipes_userfavorite."""
 
+    class Meta(UserFavoriteBase.Meta):
+        verbose_name = 'избранное'
+        verbose_name_plural = 'Избранное'
+
 
 class Purchase(UserFavoriteBase):
     """Модель связи пользователя и рецепта,
     таблица recipes_userpurchase."""
 
+    class Meta(UserFavoriteBase.Meta):
+        verbose_name = 'корзина покупок'
+        verbose_name_plural = 'Корзины покупок'
 
-class Followings(models.Model):
+
+class Subscription(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='subscriptions'
+        related_name='subscriptions_added',
+        verbose_name='Подписчик',
     )
-    following = models.ForeignKey(
+    author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='followers'
+        related_name='subscriptions_recieved',
+        verbose_name='Автор',
     )
 
     class Meta:
         constraints = (
             models.UniqueConstraint(
-                fields=('user', 'following',),
-                name='unique_following',
+                fields=('user', 'author',),
+                name='unique_subscription',
             ),
         )
         verbose_name = 'подписка'

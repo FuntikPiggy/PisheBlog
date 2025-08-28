@@ -30,7 +30,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_filters',
     'recipes.apps.RecipesConfig',
-    'drf_yasg',
+    'api.apps.ApiConfig',
 ]
 
 MIDDLEWARE = [
@@ -138,18 +138,9 @@ AUTH_USER_MODEL = 'recipes.FoodgramUser'
 
 
 DJOSER = {
-    'SERIALIZERS': {'user': 'api.serializers.CustomUserSerializer',
-                    'current_user': 'api.serializers.CustomUserSerializer',},
+    'SERIALIZERS': {'user': 'api.serializers.FoodgramUserSerializer',
+                    'current_user': 'api.serializers.FoodgramUserSerializer',},
     'PERMISSIONS': {
-        'activation': ['rest_framework.permissions.AllowAny'],
-        'password_reset': ['rest_framework.permissions.AllowAny'],
-        'password_reset_confirm': ['rest_framework.permissions.AllowAny'],
-        'set_password': ['djoser.permissions.CurrentUserOrAdmin'],
-        'username_reset': ['rest_framework.permissions.AllowAny'],
-        'username_reset_confirm': ['rest_framework.permissions.AllowAny'],
-        'set_username': ['djoser.permissions.CurrentUserOrAdmin'],
-        'user_create': ['rest_framework.permissions.AllowAny'],
-        'user_delete': ['djoser.permissions.CurrentUserOrAdmin'],
         'user': ['rest_framework.permissions.AllowAny'],
         'user_list': ['rest_framework.permissions.AllowAny'],
     },

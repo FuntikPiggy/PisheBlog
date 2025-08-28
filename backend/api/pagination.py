@@ -5,3 +5,4 @@ class QueryPageNumberPagination(PageNumberPagination):
     """Класс пагинации с размером страницы из параметра запроса."""
 
     page_size_query_param = 'limit'
+    page_size = 6

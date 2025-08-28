@@ -8,6 +8,7 @@ class Command(GetDataFromFileBase):
     help = 'Импорт ингредиентов из json-файла в БД'
     filename = 'recipes_ingredient'
     klass = Ingredient
+    table_verbose = 'Ингредиенты'
 
 
 if __name__ == '__main__':

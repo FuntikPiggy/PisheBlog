@@ -1,24 +1,29 @@
 from datetime import datetime
 
-from django.http import HttpResponse
+from django.http import FileResponse
 
+PRODUCTS = ' {:02}.{} - {}{}'
+RECIPES = ' {} ({} {})'
 
 def save_shopping_file(ingredients, recipes):
-    [i.update({'length': 40 - len(str(i["amount"])) - len(i["m_unit"])})
-     for i in ingredients]
-    [r.update({'length': 41 - len(r["author"])}) for r in recipes]
     shopping = '\n'.join([
         f'Список покупок (от {datetime.now().strftime("%d.%m.%Y")}):',
 
         '\nПродукты:',
 
-        *[f' {n:02}.{i["name"].capitalize():.<{i["length"]}}'
-          f'{i["amount"]}{i["m_unit"]}'
-          f'' for n, i in enumerate(ingredients)],
+        *[PRODUCTS.format(
+            n+1,
+            i["name"].capitalize(),
+            i["amount"],
+            i["m_unit"]
+        ) for n, i in enumerate(ingredients)],
 
         '\nРецепты:',
-        *[f' {r["name"][:30]:.<{r["length"]}}({r["author"]}'
-          f')' for r in recipes],
+        *[RECIPES.format(
+            r.recipe.name,
+            r.recipe.author.first_name,
+            r.recipe.author.last_name,
+        ) for r in recipes],
 
     ])
-    return HttpResponse(shopping, content_type='text/plain')
+    return FileResponse(shopping, 'shopping.txt')

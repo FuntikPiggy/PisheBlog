@@ -16,7 +16,7 @@ class GetDataFromFileBase(BaseCommand):
                 self.klass.objects.bulk_create(
                     self.klass(**i) for i in json.load(ofl)
                 )
-                print(f'Таблица "Ингредиенты" обновлена!\n')
+                print(f'Таблица "{self.table_verbose}" обновлена!\n')
             except sqlite3.IntegrityError or psycopg2.IntegrityError as e:
-                print(f'В таблице "Ингредиенты" данные не обновлены\n'
+                print(f'В таблице "{self.table_verbose}" данные не обновлены\n'
                       f'в связи с возникшей ошибкой:\n*** {e}\n')

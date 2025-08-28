@@ -2,6 +2,7 @@ volumes:
   pg_data:
   static:
   media:
+  docs:
 
 services:
   db:
@@ -17,6 +18,7 @@ services:
     volumes:
       - static:/backend_static
       - media:/app/media
+      - docs:/docs
   frontend:
     image: funtikpiggy/foodgram_frontend
     env_file: .env
@@ -34,3 +36,4 @@ services:
     volumes:
       - static:/staticfiles
       - media:/media
+      - docs:/docs
