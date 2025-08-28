@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.db.models import Sum, Count
 
 
 class SubsFilterBase(admin.SimpleListFilter):
@@ -61,9 +60,10 @@ class CookTimeFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         queryset = model_admin.model.objects.all()
-        self.lower_limit = max(20, (queryset.aggregate(
-            time=Sum('cooking_time') / Count('cooking_time')
-        )['time'] // 3 * 2 // 5 + 1) * 5)
+        times = sorted(set(queryset.values_list('cooking_time', flat=True)))
+        if len(times) < 5:
+            return []
+        self.lower_limit = times[len(times) // 3]
         self.upper_limit = self.lower_limit * 2
         return [
             (0, f'<{self.lower_limit}мин.'),

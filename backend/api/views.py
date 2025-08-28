@@ -44,11 +44,14 @@ class FoodgramUserViewSet(UserViewSet):
             ).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         author = get_object_or_404(User, id=kwargs['id'])
-        data = dict(user=request.user, author=author)
-        if (Subscription.objects.filter(**data).exists()
-                or request.user == author):
-            raise ValidationError()
-        request.user.subscriptions_added.add(Subscription(**data), bulk=False)
+        if Subscription.objects.filter(
+                user=request.user, author=author
+        ).exists():
+            raise ValidationError(f'Вы уже подписаны на пользователя '
+                                  f'{author.last_name} {author.first_name}')
+        if request.user == author:
+            raise ValidationError('Нельзя подписаться на себя!')
+        Subscription.objects.create(user=request.user, author=author)
         return Response(
             UserSubscriptionsSerializer(
                 author, context={'request': request},).data,
@@ -82,16 +85,15 @@ class FoodgramUserViewSet(UserViewSet):
     )
     def avatar(self, request, *args, **kwargs):
         """Метод добавления и удаления аватара."""
-        if request.method == 'PUT':
-            serializer = AvatarUserSerializer(request.user, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            return Response(
-                serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        elif request.method == 'DELETE':
+        if request.method == 'DELETE':
             request.user.avatar.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+        serializer = AvatarUserSerializer(request.user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(
+            serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -135,10 +137,10 @@ class RecipeViewSet(ModelViewSet):
             get_object_or_404(klass, user=request.user, recipe=id).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         recipe = get_object_or_404(Recipe, id=id)
-        data = dict(user=request.user, recipe=recipe)
-        if klass.objects.filter(**data).exists():
-            raise ValidationError('Такой рецепт уже добавлен!')
-        queryset.add(klass(**data), bulk=False)
+        if klass.objects.filter(user=request.user, recipe=recipe).exists():
+            raise ValidationError(f'{recipe.name} уже есть в '
+                                  f'{klass._meta.verbose_name_plural}!')
+        klass.objects.create(user=request.user, recipe=recipe)
         return Response(
             BriefRecipeSerializer(
                 recipe, context={'request': request},).data,
@@ -181,7 +183,7 @@ class RecipeViewSet(ModelViewSet):
     def get_link(self, request, id):
         """Метод получения короткой ссылки."""
         if not Recipe.objects.filter(id=id).exists():
-            raise Http404('Такого рецепта в базе нет')
+            raise Http404(f'Рецепта с id {id} в базе нет')
         return Response(
             {'short-link': request.build_absolute_uri(
                 reverse('recipes:short-link', args=(id,)),

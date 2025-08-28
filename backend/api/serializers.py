@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
 from djoser.serializers import UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
@@ -17,7 +18,7 @@ class FoodgramUserSerializer(UserSerializer):
     class Meta(UserSerializer.Meta):
         model = User
         fields = (*UserSerializer.Meta.fields, 'is_subscribed', 'avatar',)
-        read_only_fields = ('is_subscribed',)
+        read_only_fields = fields
 
     def get_is_subscribed(self, author):
         user = self.context['request'].user
@@ -90,6 +91,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     image = Base64ImageField()
+    cooking_time = serializers.IntegerField(validators=(MinValueValidator(1),))
 
     class Meta:
         model = Recipe
@@ -126,9 +128,9 @@ class RecipeSerializer(serializers.ModelSerializer):
         recipe.tags.set(tags)
         recipe.ingredients.clear()
         RecipeIngredient.objects.bulk_create(
-            [RecipeIngredient(
+            RecipeIngredient(
                 recipe=recipe, ingredient_id=i[0], amount=i[1],
-            ) for i in ingredients_amounts]
+            ) for i in ingredients_amounts
         )
         return recipe
 
@@ -138,16 +140,22 @@ class RecipeSerializer(serializers.ModelSerializer):
             (i['id'], int(i['amount']))
             for i in self.initial_data.get('ingredients', [])
         ]
-        if (not ingredients_amounts
-                or len(ingredients_amounts) != len(set(ingredients_amounts))
-                or not all(Ingredient.objects.filter(id=i[0]).exists()
-                           and i[1] > 0
-                           for i in ingredients_amounts)):
-            raise serializers.ValidationError('Проверьте ингредиенты')
-        if (len(tag_ids) != len(set(tag_ids)) or len(tag_ids) == 0
-                or not all(Tag.objects.filter(id=i).exists()
-                           for i in tag_ids)):
-            raise serializers.ValidationError('Проверьте теги')
+        if not ingredients_amounts:
+            raise serializers.ValidationError('Не заданы продукты!')
+        if len(ingredients_amounts) != len(set(ingredients_amounts)):
+            raise serializers.ValidationError('Заданы одинаковые продукты!')
+        if not all(Ingredient.objects.filter(id=i[0]).exists()
+                   for i in ingredients_amounts):
+            raise serializers.ValidationError('Отсутствующие в базе продукты!')
+        if not all(i[1] > 0 for i in ingredients_amounts):
+            raise serializers.ValidationError(
+                'Количество продукта не может быть меньше 1!')
+        if len(tag_ids) != len(set(tag_ids)):
+            raise serializers.ValidationError('Заданы одинаковые теги!')
+        if len(tag_ids) == 0:
+            raise serializers.ValidationError('Не заданы теги!')
+        if not all(Tag.objects.filter(id=i).exists() for i in tag_ids):
+            raise serializers.ValidationError('Отсутствующие в базе теги!')
         return tag_ids, ingredients_amounts
 
     def create(self, validated_data):

@@ -1,6 +1,4 @@
 import json
-import psycopg2
-import sqlite3
 
 from django.conf import settings
 from django.core.management import BaseCommand
@@ -10,16 +8,17 @@ class GetDataFromFileBase(BaseCommand):
     """Базовый класс для команд загрузки данных из json в БД"""
 
     def handle(self, *args, **options):
-        with open(
-                str(settings.BASE_DIR / 'data' / f'{self.filename}.json'),
-                'r',
-                encoding='U8'
-        ) as ofl:
-            try:
+        try:
+            with open(
+                    settings.BASE_DIR / 'data' / f'{self.filename}.json',
+                    'r', encoding='U8',
+            ) as ofl:
+                rows = [self.klass(**i) for i in json.load(ofl)]
                 self.klass.objects.bulk_create(
-                    self.klass(**i) for i in json.load(ofl)
+                    rows, ignore_conflicts=True,
                 )
-                print(f'Таблица "{self.table_verbose}" обновлена!\n')
-            except sqlite3.IntegrityError or psycopg2.IntegrityError as e:
-                print(f'В таблице "{self.table_verbose}" данные не обновлены\n'
-                      f'в связи с возникшей ошибкой:\n*** {e}\n')
+                print(f'В таблицу {self.klass._meta.verbose_name_plural} '
+                      f'добавлено {len(rows)} записей!\n')
+        except Exception as e:
+            print(f'В таблице "{self.klass._meta.verbose_name_plural}" данные '
+                  f'не обновлены\n в связи с возникшей ошибкой:\n*** {e}\n')
