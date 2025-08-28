@@ -1,8 +1,8 @@
 from admin_decorators import short_description
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
-from django.db.models import F
 from django.utils.safestring import mark_safe
 
 from .filters import (HasRecipes, HasSubscriptions, HasFollowers,
@@ -19,7 +19,6 @@ class RecipesCountMixin:
     и ограничения выдачи."""
 
     list_display = ('recipes_count',)
-    list_per_page = 15
 
     @admin.display(description='Рецептов',)
     def recipes_count(self, obj):
@@ -69,6 +68,7 @@ class TagAdmin(RecipesCountMixin, admin.ModelAdmin):
 
     list_display = ('name', 'slug', *RecipesCountMixin.list_display,)
     search_fields = ('name', 'slug',)
+    list_per_page = 15
 
 
 @admin.register(Ingredient)
@@ -79,6 +79,7 @@ class IngredientAdmin(RecipesCountMixin, admin.ModelAdmin):
                     *RecipesCountMixin.list_display,)
     list_filter = (IsInRecipe, 'measurement_unit',)
     search_fields = ('name', 'measurement_unit',)
+    list_per_page = 15
 
 
 class TagsInline(admin.TabularInline):
@@ -89,30 +90,8 @@ class IngredientInline(admin.TabularInline):
     model = Recipe.ingredients.through
 
 
-class IngrediensListMixin:
-    """Миксин для добавления поля с перечнем продуктов."""
-
-    @short_description('Продукты')
-    @mark_safe
-    def ingredients_list(self, obj):
-        recipe = obj if isinstance(obj, Recipe) else obj.recipe
-        ingredients = list(
-            recipe.ingredients.all().prefetch_related(
-                'recipeingredients',
-            ).values(
-                'name',
-                unit=F('measurement_unit'),
-                amount=F('recipeingredients__amount'),
-            )
-        )
-        return "".join(
-            [f"{i['name']} - {i['amount']}{i['unit']}<br>"
-             for i in ingredients]
-        )
-
-
 @admin.register(Recipe)
-class RecipeAdmin(IngrediensListMixin, admin.ModelAdmin):
+class RecipeAdmin(admin.ModelAdmin):
     """Настройки раздела Рецепты админ-панели."""
 
     list_display = ('id', 'name', 'tags_list', 'image_small', 'author_name',
@@ -128,6 +107,15 @@ class RecipeAdmin(IngrediensListMixin, admin.ModelAdmin):
     filter_horizontal = ('tags', )
     list_per_page = 8
 
+    @short_description('Продукты')
+    @mark_safe
+    def ingredients_list(self, recipe):
+        recipeingredients = recipe.recipeingredients.all()
+        return "<br>".join(
+            f"{i.ingredient.name} - {i.amount}{i.ingredient.measurement_unit}"
+            for i in recipeingredients.order_by('ingredient__name',)
+        )
+
     @admin.display(description='В избранном',)
     def followers(self, recipe):
         return recipe.favorites.count()
@@ -138,7 +126,7 @@ class RecipeAdmin(IngrediensListMixin, admin.ModelAdmin):
 
     def get_image(self, recipe):
         if not recipe.image:
-            return '/static/recipes/admin/not-found.png'
+            return settings.STATIC_ROOT / 'recipes' / 'admin' / 'not-found.png'
         return recipe.image.url
 
     @short_description('Изображение')
@@ -149,7 +137,7 @@ class RecipeAdmin(IngrediensListMixin, admin.ModelAdmin):
     @short_description('Теги')
     @mark_safe
     def tags_list(self, recipe):
-        return "".join([f"{i.name}<br>" for i in recipe.tags.all()])
+        return "<br>".join(i.name for i in recipe.tags.all())
 
 
 @admin.register(Subscription)
@@ -181,13 +169,13 @@ class SubscriptionAdmin(admin.ModelAdmin):
         return self.get_user_info(subscription.author)
 
 
-class UserFavoriteBaseAdmin(IngrediensListMixin, admin.ModelAdmin):
+class UserFavoriteBaseAdmin(admin.ModelAdmin):
     """Базовый класс для Избранного и Корзины покупок."""
 
-    list_display = ('id', 'user_name', 'recipe__name', 'ingredients_list')
+    list_display = ('id', 'user_name', 'recipe__name', )
     list_display_links = ('id', 'user_name',)
     search_fields = ('user__last_name', 'user__first_name',
-                     'recipe__name', 'recipe__ingredients__name')
+                     'recipe__name',)
     ordering = ('user__last_name',)
     list_per_page = 8
 

@@ -3,14 +3,8 @@ from recipes.models import Ingredient
 
 
 class Command(GetDataFromFileBase):
-    """Класс команды на вставку данных ингредиентов из json в БД"""
+    """Класс команды на вставку данных о продуктах из json в БД"""
 
-    help = 'Импорт ингредиентов из json-файла в БД'
-    filename = 'recipes_ingredient'
+    help = 'Импорт продуктов из json-файла в БД'
+    filename = 'ingredients'
     klass = Ingredient
-    table_verbose = 'Ингредиенты'
-
-
-if __name__ == '__main__':
-    command1 = Command()
-    command1.handle()
