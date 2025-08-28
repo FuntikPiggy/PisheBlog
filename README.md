@@ -176,7 +176,7 @@ npm i
 "web" на "localhost":
 
 ```
-"proxy": "http://web:8000/"  -->  "proxy": "http://localhost:8000/"
+"proxy": "http://web:8000/"    -->    "proxy": "http://localhost:8000/"
 ```
 
 Фронтенд готов к запуску. Запустите его:
