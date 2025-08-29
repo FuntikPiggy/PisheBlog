@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django_filters import rest_framework as filters, BooleanFilter, NumberFilter
+from django_filters import rest_framework as filters, NumberFilter
 
 from recipes.models import Recipe
 
