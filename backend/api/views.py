@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db.models import F, Sum
-from django.http import Http404
+from django.http import Http404, FileResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
@@ -44,14 +44,14 @@ class FoodgramUserViewSet(UserViewSet):
             ).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         author = get_object_or_404(User, id=kwargs['id'])
-        if Subscription.objects.filter(
-                user=request.user, author=author
-        ).exists():
-            raise ValidationError(f'Вы уже подписаны на пользователя '
-                                  f'{author.last_name} {author.first_name}')
         if request.user == author:
             raise ValidationError('Нельзя подписаться на себя!')
-        Subscription.objects.create(user=request.user, author=author)
+        _, created = Subscription.objects.get_or_create(
+            user=request.user, author=author
+        )
+        if not created:
+            raise ValidationError(f'Вы уже подписаны на пользователя '
+                                  f'{author.username}')
         return Response(
             UserSubscriptionsSerializer(
                 author, context={'request': request},).data,
@@ -131,16 +131,17 @@ class RecipeViewSet(ModelViewSet):
         serializer.save(author=self.request.user)
 
     @staticmethod
-    def favorite_shopping_base(request, klass, queryset, id):
+    def favorite_shopping_base(request, model, queryset, id):
         """Базовый метод для методов добавления в избранное и корзину>."""
         if request.method == 'DELETE':
-            get_object_or_404(klass, user=request.user, recipe=id).delete()
+            get_object_or_404(model, user=request.user, recipe=id).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         recipe = get_object_or_404(Recipe, id=id)
-        if klass.objects.filter(user=request.user, recipe=recipe).exists():
-            raise ValidationError(f'{recipe.name} уже есть в '
-                                  f'{klass._meta.verbose_name_plural}!')
-        klass.objects.create(user=request.user, recipe=recipe)
+        _, created = Subscription.objects.get_or_create(
+            user=request.user, recipe=recipe)
+        if not created:
+            raise ValidationError(
+                f'{recipe.name} уже есть в {model._meta.verbose_name_plural}!')
         return Response(
             BriefRecipeSerializer(
                 recipe, context={'request': request},).data,
@@ -176,7 +177,10 @@ class RecipeViewSet(ModelViewSet):
         recipes = request.user.purchases.prefetch_related(
             'recipe', 'recipe__author'
         )
-        return save_shopping_file(ingredients, recipes)
+        return FileResponse(
+            save_shopping_file(ingredients, recipes),
+            'shopping.txt'
+        )
 
     @action(('get',), url_path='get-link',
             detail=True, permission_classes=(AllowAny,),)

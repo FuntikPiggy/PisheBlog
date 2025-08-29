@@ -3,10 +3,12 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
+from django.db import models
 from django.utils.safestring import mark_safe
 
 from .filters import (HasRecipes, HasSubscriptions, HasFollowers,
-                      IsInRecipe, IsInFavorites, CookTimeFilter)
+                      IsInRecipe, IsInFavorites, CookTimeFilter, titled_filter)
+from ..forms import RecipeAdminForm
 from ..models import Tag, Ingredient, Recipe, Subscription, Favorite, Purchase
 
 User = get_user_model()
@@ -84,45 +86,54 @@ class IngredientAdmin(RecipesCountMixin, admin.ModelAdmin):
 
 class TagsInline(admin.TabularInline):
     model = Recipe.tags.through
+    extra = 0
+    verbose_name = Tag._meta.verbose_name
+    verbose_name_plural = Tag._meta.verbose_name_plural
 
 
 class IngredientInline(admin.TabularInline):
     model = Recipe.ingredients.through
+    extra = 0
+    verbose_name = Ingredient._meta.verbose_name
+    verbose_name_plural = Ingredient._meta.verbose_name_plural
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     """Настройки раздела Рецепты админ-панели."""
 
+    # tags__name = models.CharField(verbose_name="Тэги", )
     list_display = ('id', 'name', 'tags_list', 'image_small', 'author_name',
                     'followers', 'ingredients_list', 'cooking_time',)
     list_display_links = ('id', 'name', 'image_small',)
-    readonly_fields = ('author_name', 'followers', 'name',)
-    search_fields = ('name', 'author__first_name', 'author__last_name',)
-    list_filter = (IsInFavorites, CookTimeFilter, 'tags__name',)
+    readonly_fields = ('followers', 'name',)
+    search_fields = ('name', 'author_name',)
+    list_filter = (IsInFavorites, CookTimeFilter, ('tags__name', titled_filter('Тэги')),)
     inlines = [
         TagsInline,
         IngredientInline,
     ]
     filter_horizontal = ('tags', )
     list_per_page = 8
+    form = RecipeAdminForm
 
     @short_description('Продукты')
     @mark_safe
     def ingredients_list(self, recipe):
-        recipeingredients = recipe.recipeingredients.all()
-        return "<br>".join(
-            f"{i.ingredient.name} - {i.amount}{i.ingredient.measurement_unit}"
-            for i in recipeingredients.order_by('ingredient__name',)
+        return '<br>'.join(
+            f'{i.ingredient.name} - {i.amount}{i.ingredient.measurement_unit}'
+            for i in recipe.recipeingredients.all().order_by(
+                'ingredient__name',
+            )
         )
 
     @admin.display(description='В избранном',)
     def followers(self, recipe):
         return recipe.favorites.count()
 
-    @admin.display(description='ФИО автора',)
+    @admin.display(description='Автор',)
     def author_name(self, recipe):
-        return f'{recipe.author.first_name} {recipe.author.last_name}'
+        return recipe.author.username
 
     def get_image(self, recipe):
         if not recipe.image:
@@ -137,7 +148,7 @@ class RecipeAdmin(admin.ModelAdmin):
     @short_description('Теги')
     @mark_safe
     def tags_list(self, recipe):
-        return "<br>".join(i.name for i in recipe.tags.all())
+        return '<br>'.join(i.name for i in recipe.tags.all())
 
 
 @admin.register(Subscription)

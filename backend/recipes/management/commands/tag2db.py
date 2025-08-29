@@ -7,4 +7,4 @@ class Command(GetDataFromFileBase):
 
     help = 'Импорт тегов из json-файла в БД'
     filename = 'recipes_tag'
-    klass = Tag
+    model = Tag

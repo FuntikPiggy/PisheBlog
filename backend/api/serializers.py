@@ -1,9 +1,9 @@
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator
 from djoser.serializers import UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
+from recipes.constants import MIN_COOK_TIME
 from recipes.models import Tag, Ingredient, Recipe, RecipeIngredient
 
 User = get_user_model()
@@ -91,7 +91,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     image = Base64ImageField()
-    cooking_time = serializers.IntegerField(validators=(MinValueValidator(1),))
+    cooking_time = serializers.IntegerField(min_value=MIN_COOK_TIME)
 
     class Meta:
         model = Recipe
@@ -144,18 +144,10 @@ class RecipeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Не заданы продукты!')
         if len(ingredients_amounts) != len(set(ingredients_amounts)):
             raise serializers.ValidationError('Заданы одинаковые продукты!')
-        if not all(Ingredient.objects.filter(id=i[0]).exists()
-                   for i in ingredients_amounts):
-            raise serializers.ValidationError('Отсутствующие в базе продукты!')
-        if not all(i[1] > 0 for i in ingredients_amounts):
-            raise serializers.ValidationError(
-                'Количество продукта не может быть меньше 1!')
         if len(tag_ids) != len(set(tag_ids)):
             raise serializers.ValidationError('Заданы одинаковые теги!')
         if len(tag_ids) == 0:
             raise serializers.ValidationError('Не заданы теги!')
-        if not all(Tag.objects.filter(id=i).exists() for i in tag_ids):
-            raise serializers.ValidationError('Отсутствующие в базе теги!')
         return tag_ids, ingredients_amounts
 
     def create(self, validated_data):

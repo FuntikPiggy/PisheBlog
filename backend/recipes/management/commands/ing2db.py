@@ -7,4 +7,4 @@ class Command(GetDataFromFileBase):
 
     help = 'Импорт продуктов из json-файла в БД'
     filename = 'ingredients'
-    klass = Ingredient
+    model = Ingredient

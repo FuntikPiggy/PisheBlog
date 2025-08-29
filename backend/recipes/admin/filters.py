@@ -9,6 +9,7 @@ class SubsFilterBase(admin.SimpleListFilter):
     def lookups(self, request, model_admin):
         return self.LOOK_UPS
 
+
     def queryset(self, request, queryset):
         if self.value() == '1':
             return queryset.filter(
@@ -55,16 +56,16 @@ class IsInFavorites(SubsFilterBase):
 class CookTimeFilter(admin.SimpleListFilter):
     """Фильтр по времени приготовления."""
 
-    title = 'Время приготовления'
+    title = 'Время (мин)'
     parameter_name = 'time'
 
     def lookups(self, request, model_admin):
         queryset = model_admin.model.objects.all()
         times = sorted(set(queryset.values_list('cooking_time', flat=True)))
-        if len(times) < 5:
+        if len(times) < 3:
             return []
         self.lower_limit = times[len(times) // 3]
-        self.upper_limit = self.lower_limit * 2
+        self.upper_limit = times[len(times) // 3 * 2]
         return [
             (0, f'<{self.lower_limit}мин.'),
             (1, f'{self.lower_limit}-{self.upper_limit}мин.'),
@@ -80,3 +81,12 @@ class CookTimeFilter(admin.SimpleListFilter):
         elif self.value() == '2':
             return queryset.filter(cooking_time__gt=self.upper_limit)
         return queryset
+
+
+def titled_filter(title):
+    class Wrapper(admin.FieldListFilter):
+        def __new__(cls, *args, **kwargs):
+            instance = admin.FieldListFilter.create(*args, **kwargs)
+            instance.title = title
+            return instance
+    return Wrapper

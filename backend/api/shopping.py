@@ -1,14 +1,12 @@
 from datetime import datetime
 
-from django.http import FileResponse
-
 
 PRODUCTS = ' {:02}.{} - {}{}'
 RECIPES = ' {} ({})'
 
 
 def save_shopping_file(ingredients, recipes):
-    shopping = '\n'.join([
+    return '\n'.join([
         f'Список покупок (от {datetime.now().strftime("%d.%m.%Y")}):',
         '',
         'Продукты:',
@@ -25,4 +23,3 @@ def save_shopping_file(ingredients, recipes):
             r.recipe.author.username,
         ) for r in recipes],
     ])
-    return FileResponse(shopping, 'shopping.txt')
