@@ -14,6 +14,7 @@ INGREDIENT_MEASURE_LENGTH = 64
 RECIPE_NAME_LENGTH = 256
 # Сообщения
 USERNAME_VALID = 'Используются только буквы, цифры и символы @/./+/-/_ .'
+IF_ANON = 'Без ФИО'
 
 MIN_COOK_TIME = 1
 MIN_AMOUNT = 1

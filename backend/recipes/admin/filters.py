@@ -9,7 +9,6 @@ class SubsFilterBase(admin.SimpleListFilter):
     def lookups(self, request, model_admin):
         return self.LOOK_UPS
 
-
     def queryset(self, request, queryset):
         if self.value() == '1':
             return queryset.filter(
@@ -67,9 +66,9 @@ class CookTimeFilter(admin.SimpleListFilter):
         self.lower_limit = times[len(times) // 3]
         self.upper_limit = times[len(times) // 3 * 2]
         return [
-            (0, f'<{self.lower_limit}мин.'),
-            (1, f'{self.lower_limit}-{self.upper_limit}мин.'),
-            (2, f'>{self.upper_limit}мин.'),
+            (0, f'< {self.lower_limit}мин.'),
+            (1, f'{self.lower_limit} - {self.upper_limit}мин.'),
+            (2, f'> {self.upper_limit}мин.'),
         ]
 
     def queryset(self, request, queryset):
@@ -84,6 +83,7 @@ class CookTimeFilter(admin.SimpleListFilter):
 
 
 def titled_filter(title):
+    """Декоратор для имён фильтров."""
     class Wrapper(admin.FieldListFilter):
         def __new__(cls, *args, **kwargs):
             instance = admin.FieldListFilter.create(*args, **kwargs)

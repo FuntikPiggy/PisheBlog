@@ -3,17 +3,17 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
-from django.db import models
+from django.contrib.auth.models import Group
 from django.utils.safestring import mark_safe
 
 from .filters import (HasRecipes, HasSubscriptions, HasFollowers,
                       IsInRecipe, IsInFavorites, CookTimeFilter, titled_filter)
-from ..forms import RecipeAdminForm
 from ..models import Tag, Ingredient, Recipe, Subscription, Favorite, Purchase
 
 User = get_user_model()
 
 admin.site.empty_value_display = 'Не задано'
+admin.site.unregister(Group)
 
 
 class RecipesCountMixin:
@@ -34,12 +34,18 @@ class FoodgramUserAdmin(RecipesCountMixin, UserAdmin):
     list_display = ('id', 'username', 'full_name', 'avatar_small', 'email',
                     *RecipesCountMixin.list_display, 'subscriptions_count',
                     'followers_count',)
-    list_display_links = ('id', 'username', 'full_name',)
+    list_display_links = ('id', 'username', 'full_name', 'avatar_small',)
     ordering = ('last_name',)
     readonly_fields = ('full_name', 'recipes_count',
                        'subscriptions_count', 'followers_count',)
     list_filter = (HasRecipes, HasSubscriptions, HasFollowers, )
     list_per_page = 8
+    show_facets = admin.ShowFacets.NEVER
+
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = super().get_fieldsets(request, obj)
+        fieldsets[1][1]['fields'] = fieldsets[1][1]['fields'] + ('avatar',)
+        return fieldsets
 
     @admin.display(description='ФИО',)
     def full_name(self, user):
@@ -82,6 +88,7 @@ class IngredientAdmin(RecipesCountMixin, admin.ModelAdmin):
     list_filter = (IsInRecipe, 'measurement_unit',)
     search_fields = ('name', 'measurement_unit',)
     list_per_page = 15
+    show_facets = admin.ShowFacets.NEVER
 
 
 class TagsInline(admin.TabularInline):
@@ -102,20 +109,18 @@ class IngredientInline(admin.TabularInline):
 class RecipeAdmin(admin.ModelAdmin):
     """Настройки раздела Рецепты админ-панели."""
 
-    # tags__name = models.CharField(verbose_name="Тэги", )
     list_display = ('id', 'name', 'tags_list', 'image_small', 'author_name',
                     'followers', 'ingredients_list', 'cooking_time',)
     list_display_links = ('id', 'name', 'image_small',)
     readonly_fields = ('followers', 'name',)
     search_fields = ('name', 'author_name',)
-    list_filter = (IsInFavorites, CookTimeFilter, ('tags__name', titled_filter('Тэги')),)
-    inlines = [
-        TagsInline,
-        IngredientInline,
-    ]
+    list_filter = (IsInFavorites, CookTimeFilter,
+                   ('author__username', titled_filter('Автор')),
+                   ('tags__name', titled_filter('Тэги')),)
+    inlines = (TagsInline, IngredientInline,)
     filter_horizontal = ('tags', )
     list_per_page = 8
-    form = RecipeAdminForm
+    show_facets = admin.ShowFacets.NEVER
 
     @short_description('Продукты')
     @mark_safe

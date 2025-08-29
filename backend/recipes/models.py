@@ -8,7 +8,7 @@ from django.db.models import ForeignKey
 
 from . import constants
 from .constants import (USERNAME_VALID, USERNAME_REGEX,
-                        MIN_COOK_TIME, MIN_AMOUNT)
+                        MIN_COOK_TIME, MIN_AMOUNT, IF_ANON)
 
 
 class FoodgramUser(AbstractUser):
@@ -54,10 +54,8 @@ class FoodgramUser(AbstractUser):
         ordering = ('username',)
 
     def __str__(self):
-        return (f'{self.username[:64]=} '
-                f'{self.first_name[:64]=} '
-                f'{self.last_name[:64]=} '
-                f'{self.email[:64]=}')
+        return (f'{self.username[:64]} '
+                f'({(self.last_name[:64] + self.first_name[:64]) or IF_ANON})')
 
 
 User = get_user_model()
@@ -84,8 +82,8 @@ class Tag(models.Model):
         ordering = ('name',)
 
     def __str__(self):
-        return (f'{self.name=} '
-                f'{self.slug=}')
+        return (f'{self.name} '
+                f'({self.slug})')
 
 
 class Ingredient(models.Model):
@@ -112,8 +110,8 @@ class Ingredient(models.Model):
         )
 
     def __str__(self):
-        return (f'{self.name[:32]=} '
-                f'{self.measurement_unit[:32]=}')
+        return (f'{self.name[:32]} '
+                f'({self.measurement_unit[:32]})')
 
 
 class Recipe(models.Model):
@@ -167,10 +165,8 @@ class Recipe(models.Model):
         default_related_name = 'recipes'
 
     def __str__(self):
-        return (f'{self.name[:32]=}'
-                f'{self.author=}'
-                f'{self.pub_date=}'
-                f'{self.tags=} ')
+        return (f'{self.name[:32]} '
+                f'от {self.author.username[:32]}')
 
 
 class RecipeIngredient(models.Model):
@@ -230,8 +226,8 @@ class UserFavoriteBase(models.Model):
         )
 
     def __str__(self):
-        return (f'{self.user.username[:32]=} '
-                f'{self.recipe.name[:32]=}')
+        return (f'{self.user.username[:32]} '
+                f'- {self.recipe.name[:32]}')
 
 
 class Favorite(UserFavoriteBase):

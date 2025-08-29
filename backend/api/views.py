@@ -24,6 +24,7 @@ from .serializers import (TagSerializer, IngredientSerializer,
                           AvatarUserSerializer, )
 from .shopping import save_shopping_file
 
+
 User = get_user_model()
 
 
@@ -137,7 +138,7 @@ class RecipeViewSet(ModelViewSet):
             get_object_or_404(model, user=request.user, recipe=id).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         recipe = get_object_or_404(Recipe, id=id)
-        _, created = Subscription.objects.get_or_create(
+        _, created = model.objects.get_or_create(
             user=request.user, recipe=recipe)
         if not created:
             raise ValidationError(
@@ -153,14 +154,14 @@ class RecipeViewSet(ModelViewSet):
     def favorite(self, request, id):
         """Метод добавления в избранное."""
         return self.favorite_shopping_base(
-            request, Favorite, request.user.favorites, id)
+            request, Favorite, request.user.favorites.all(), id)
 
     @action(('post', 'delete',), detail=True,
             permission_classes=(IsAuthenticated,),)
     def shopping_cart(self, request, id):
         """Метод добавления в корзину покупок."""
         return self.favorite_shopping_base(
-            request, Purchase, request.user.purchases, id)
+            request, Purchase, request.user.purchases.all(), id)
 
     @action(('get',), detail=False,
             permission_classes=(IsAuthenticated,),)

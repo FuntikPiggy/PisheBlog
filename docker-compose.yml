@@ -1,3 +1,5 @@
+name: foodgram
+
 volumes:
   pg_data:
   static:
