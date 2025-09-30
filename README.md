@@ -1,5 +1,5 @@
 [![Main Foodgram workflow](https://github.com/FuntikPiggy/foodgram/actions/workflows/main.yml/badge.svg)](https://github.com/FuntikPiggy/foodgram/actions/workflows/main.yml)
-
+<a name="Start-point"></a>
 # FoodGram
 
 **********
@@ -36,6 +36,8 @@
 WSGI-сервер - [Gunicorn](https://gunicorn.org/).
 Веб-сервер - [Nginx](https://nginx.org/ru/).
 Пример заполнения переменных среды - см. файл **.env.example** (в репозитории).
+
+<p align="right"><a href="#Start-point">Вернуться к началу</a></p>
 
 
 <a name="How-to-run-Docker"></a>
@@ -129,6 +131,8 @@ sudo docker compose exec backend python manage.py tag2db
 sudo docker compose exec backend python manage.py createsuperuser
 ```
 
+<p align="right"><a href="#Start-point">Вернуться к началу</a></p>
+
 <a name="How-to-run-w/o-Docker"></a>
 ## Как запустить проект без Docker:
 
@@ -154,6 +158,8 @@ DEBUG_MODE=  # Любая строка == True, не заполнено == False
 DB_PROD_TYPE=True  # Любая строка == True (для Postgres), не заполнено == False(для SQLite)
 CSRF_TRUSTED='<https://subdomain.example.com>'  # Ваш адрес
 ```
+
+<p align="right"><a href="#Start-point">Вернуться к началу</a></p>
 
 <a name="Run-front"></a>
 ### Запуск фронтенда проекта:
@@ -184,6 +190,8 @@ npm i
 ```bash
 npm run start
 ```
+
+<p align="right"><a href="#Start-point">Вернуться к началу</a></p>
 
 <a name="Run-db"></a>
 ### Запуск базы данных проекта:
@@ -223,6 +231,8 @@ python manage.py tag2db
 ```bash
 python manage.py createsuperuser
 ```
+
+<p align="right"><a href="#Start-point">Вернуться к началу</a></p>
 
 <a name="Run-back"></a>
 ### Запуск бэкэнда проекта:
@@ -268,6 +278,11 @@ python manage.py runserver
 Основные точки доступа развёрнутого локально проекта:
 
 [Главная страница сайта](http://127.0.0.1:3000/)
+
 [Админ-панель](http://127.0.0.1:8000/admin/)
+
 [API-панель](http://127.0.0.1:8000/api/)
+
 [Документация к API](http://127.0.0.1:8000/api/docs/)
+
+<p align="right"><a href="#Start-point">Вернуться к началу</a></p>
