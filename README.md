@@ -43,7 +43,7 @@ WSGI-сервер - [Gunicorn](https://gunicorn.org/).
 
 Клонировать репозиторий и перейти в него в командной строке:
 
-```
+```bash
 git clone https://github.com/FuntikPiggy/foodgram.git
 
 cd foodgram
@@ -51,41 +51,41 @@ cd foodgram
 
 Cоздать и активировать виртуальное окружение:
 
-```
+```bash
 python3 -m venv .venv
 ```
 
 * Если у вас Linux/macOS
 
-```
+```bash
 source .venv/bin/activate
 ```
 
 * Если у вас windows
 
-```
+```bash
 source .venv/Scripts/activate
 ```
 
-```
+```bash
 python3 -m pip install --upgrade pip
 ```
 
 Перейти в папку "backend":
 
-```
+```bash
 cd backend
 ```
 
 Установить зависимости из файла requirements.txt:
 
-```
+```bash
 pip install -r requirements.txt
 ```
 
 Создать файл .evn для хранения ключей в корне проекта:
 
-```
+```bash
 POSTGRES_USER=<имя пользователя БД>
 POSTGRES_PASSWORD=<пароль БД>
 POSTGRES_DB=<имя БД>
@@ -100,7 +100,7 @@ CSRF_TRUSTED='<https://subdomain.example.com>'  # Ваш адрес
 
 Из папки "foodgram" запустить проект:
 
-```
+```bash
 cd ..
 docker compose -f docker-compose.production.yml up
 ```
@@ -108,7 +108,7 @@ docker compose -f docker-compose.production.yml up
 Выполнить миграции, сбор статики:
 
 
-```
+```bash
 sudo docker compose exec backend python manage.py migrate
 sudo docker compose exec backend python manage.py collectstatic
 sudo docker compose exec backend cp -r /app/collected_static/. /backend_static/static/
@@ -117,7 +117,7 @@ sudo docker compose exec backend cp -r /app/collected_static/. /backend_static/s
 Наполнить базу данных ингредиентами и тэгами:
 
 
-```
+```bash
 sudo docker compose exec backend python manage.py ing2db
 sudo docker compose exec backend python manage.py tag2db
 ```
@@ -125,7 +125,7 @@ sudo docker compose exec backend python manage.py tag2db
 При необходимости создать суперпользователя (далее следовать указаниям и ввести требуемые данные):
 
 
-```
+```bash
 sudo docker compose exec backend python manage.py createsuperuser
 ```
 
@@ -134,7 +134,7 @@ sudo docker compose exec backend python manage.py createsuperuser
 
 Клонировать репозиторий и перейти в него в командной строке:
 
-```
+```bash
 git clone https://github.com/FuntikPiggy/foodgram.git
 
 cd foodgram
@@ -142,7 +142,7 @@ cd foodgram
 
 Создать файл .evn для хранения ключей в корне проекта:
 
-```
+```bash
 POSTGRES_USER=<имя пользователя БД>
 POSTGRES_PASSWORD=<пароль БД>
 POSTGRES_DB=<имя БД>
@@ -162,26 +162,26 @@ CSRF_TRUSTED='<https://subdomain.example.com>'  # Ваш адрес
 
 Перейдите в директорию "frontend" проекта:
 
-```
+```bash
 cd frontend
 ```
 
 Установите зависимости:
 
-```
+```bash
 npm i
 ```
 
 Откройте в редакторе файл "package.json" из папки "frontend" и в конце файла замените
 "web" на "localhost":
 
-```
+```bash
 "proxy": "http://web:8000/"    -->    "proxy": "http://localhost:8000/"
 ```
 
 Фронтенд готов к запуску. Запустите его:
 
-```
+```bash
 npm run start
 ```
 
@@ -191,14 +191,14 @@ npm run start
 Создать БД [Postgres](https://www.postgresql.org/download/windows/):
 Находясь в папке backend (где лежит файл manage.py), введите команду: 
 
-```
+```bash
 python manage.py migrate
 ```
 
 Создать пользователя и наделить его правами:
 
 
-```
+```bash
 CREATE USER django_user WITH PASSWORD 'mysecretpassword';
 GRANT ALL ON DATABASE django TO django_user;
 ALTER DATABASE django OWNER TO django_user;
@@ -207,20 +207,20 @@ GRANT USAGE, CREATE ON SCHEMA PUBLIC TO django_user;
 
 Перейти в папку "backend":
 
-```
+```bash
 cd ../backend
 ```
 
 Наполнить базу данных ингредиентами и тэгами:
 
-```
+```bash
 python manage.py ing2db
 python manage.py tag2db
 ```
 
 При необходимости создать суперпользователя (далее следовать указаниям и ввести требуемые данные):
 
-```
+```bash
 python manage.py createsuperuser
 ```
 
@@ -229,23 +229,23 @@ python manage.py createsuperuser
 
 Cоздать и активировать виртуальное окружение:
 
-```
+```bash
 python3 -m venv .venv
 ```
 
 * Если у вас Linux/macOS
 
-```
+```bash
 source .venv/bin/activate
 ```
 
 * Если у вас windows
 
-```
+```bash
 source .venv/Scripts/activate
 ```
 
-```
+```bash
 python3 -m pip install --upgrade pip
 ```
 
