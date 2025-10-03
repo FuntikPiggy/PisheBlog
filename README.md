@@ -1,6 +1,6 @@
 [![Main Foodgram workflow](https://github.com/FuntikPiggy/foodgram/actions/workflows/main.yml/badge.svg)](https://github.com/FuntikPiggy/foodgram/actions/workflows/main.yml)
 <a name="Start-point"></a>
-# Пищеблог <img align="right" width="120" height="42" alt="logo_readme" src="https://github.com/user-attachments/assets/9bc7311a-2f3c-414b-8ed7-463b44a8d3b3" />
+# ПищеБлог (ex. FoodGram)<img align="right" width="120" height="42" alt="logo_readme" src="https://github.com/user-attachments/assets/9bc7311a-2f3c-414b-8ed7-463b44a8d3b3" />
 
 
 
