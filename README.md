@@ -1,6 +1,6 @@
 [![Main Foodgram workflow](https://github.com/FuntikPiggy/foodgram/actions/workflows/main.yml/badge.svg)](https://github.com/FuntikPiggy/foodgram/actions/workflows/main.yml)
-
-# FoodGram
+<a name="Start-point"></a>
+# Пищеблог
 
 **********
 ## [О проекте.](#anchor-about)
@@ -37,13 +37,16 @@ WSGI-сервер - [Gunicorn](https://gunicorn.org/).
 Веб-сервер - [Nginx](https://nginx.org/ru/).
 Пример заполнения переменных среды - см. файл **.env.example** (в репозитории).
 
+<p align="right"><a href="#Start-point">Вернуться к началу</a></p>
+
 
 <a name="How-to-run-Docker"></a>
 ## Как запустить проект в контейнерах Docker:
 
 Клонировать репозиторий и перейти в него в командной строке:
 
-```
+
+```bash
 git clone https://github.com/FuntikPiggy/foodgram.git
 
 cd foodgram
@@ -51,41 +54,41 @@ cd foodgram
 
 Cоздать и активировать виртуальное окружение:
 
-```
+```bash
 python3 -m venv .venv
 ```
 
 * Если у вас Linux/macOS
 
-```
+```bash
 source .venv/bin/activate
 ```
 
 * Если у вас windows
 
-```
+```bash
 source .venv/Scripts/activate
 ```
 
-```
+```bash
 python3 -m pip install --upgrade pip
 ```
 
 Перейти в папку "backend":
 
-```
+```bash
 cd backend
 ```
 
 Установить зависимости из файла requirements.txt:
 
-```
+```bash
 pip install -r requirements.txt
 ```
 
 Создать файл .evn для хранения ключей в корне проекта:
 
-```
+```bash
 POSTGRES_USER=<имя пользователя БД>
 POSTGRES_PASSWORD=<пароль БД>
 POSTGRES_DB=<имя БД>
@@ -100,7 +103,7 @@ CSRF_TRUSTED='<https://subdomain.example.com>'  # Ваш адрес
 
 Из папки "foodgram" запустить проект:
 
-```
+```bash
 cd ..
 docker compose -f docker-compose.production.yml up
 ```
@@ -108,7 +111,7 @@ docker compose -f docker-compose.production.yml up
 Выполнить миграции, сбор статики:
 
 
-```
+```bash
 sudo docker compose exec backend python manage.py migrate
 sudo docker compose exec backend python manage.py collectstatic
 sudo docker compose exec backend cp -r /app/collected_static/. /backend_static/static/
@@ -117,7 +120,7 @@ sudo docker compose exec backend cp -r /app/collected_static/. /backend_static/s
 Наполнить базу данных ингредиентами и тэгами:
 
 
-```
+```bash
 sudo docker compose exec backend python manage.py ing2db
 sudo docker compose exec backend python manage.py tag2db
 ```
@@ -125,16 +128,18 @@ sudo docker compose exec backend python manage.py tag2db
 При необходимости создать суперпользователя (далее следовать указаниям и ввести требуемые данные):
 
 
-```
+```bash
 sudo docker compose exec backend python manage.py createsuperuser
 ```
+
+<p align="right"><a href="#Start-point">Вернуться к началу</a></p>
 
 <a name="How-to-run-w/o-Docker"></a>
 ## Как запустить проект без Docker:
 
 Клонировать репозиторий и перейти в него в командной строке:
 
-```
+```bash
 git clone https://github.com/FuntikPiggy/foodgram.git
 
 cd foodgram
@@ -142,7 +147,7 @@ cd foodgram
 
 Создать файл .evn для хранения ключей в корне проекта:
 
-```
+```bash
 POSTGRES_USER=<имя пользователя БД>
 POSTGRES_PASSWORD=<пароль БД>
 POSTGRES_DB=<имя БД>
@@ -155,6 +160,8 @@ DB_PROD_TYPE=True  # Любая строка == True (для Postgres), не з�
 CSRF_TRUSTED='<https://subdomain.example.com>'  # Ваш адрес
 ```
 
+<p align="right"><a href="#Start-point">Вернуться к началу</a></p>
+
 <a name="Run-front"></a>
 ### Запуск фронтенда проекта:
 Установите [Node.js](https://nodejs.org/en/about/previous-releases#looking-for-latest-release-of-a-version-branch) версии v24.1.0.
@@ -162,28 +169,30 @@ CSRF_TRUSTED='<https://subdomain.example.com>'  # Ваш адрес
 
 Перейдите в директорию "frontend" проекта:
 
-```
+```bash
 cd frontend
 ```
 
 Установите зависимости:
 
-```
+```bash
 npm i
 ```
 
 Откройте в редакторе файл "package.json" из папки "frontend" и в конце файла замените
 "web" на "localhost":
 
-```
+```bash
 "proxy": "http://web:8000/"    -->    "proxy": "http://localhost:8000/"
 ```
 
 Фронтенд готов к запуску. Запустите его:
 
-```
+```bash
 npm run start
 ```
+
+<p align="right"><a href="#Start-point">Вернуться к началу</a></p>
 
 <a name="Run-db"></a>
 ### Запуск базы данных проекта:
@@ -191,14 +200,14 @@ npm run start
 Создать БД [Postgres](https://www.postgresql.org/download/windows/):
 Находясь в папке backend (где лежит файл manage.py), введите команду: 
 
-```
+```bash
 python manage.py migrate
 ```
 
 Создать пользователя и наделить его правами:
 
 
-```
+```bash
 CREATE USER django_user WITH PASSWORD 'mysecretpassword';
 GRANT ALL ON DATABASE django TO django_user;
 ALTER DATABASE django OWNER TO django_user;
@@ -207,45 +216,47 @@ GRANT USAGE, CREATE ON SCHEMA PUBLIC TO django_user;
 
 Перейти в папку "backend":
 
-```
+```bash
 cd ../backend
 ```
 
 Наполнить базу данных ингредиентами и тэгами:
 
-```
+```bash
 python manage.py ing2db
 python manage.py tag2db
 ```
 
 При необходимости создать суперпользователя (далее следовать указаниям и ввести требуемые данные):
 
-```
+```bash
 python manage.py createsuperuser
 ```
+
+<p align="right"><a href="#Start-point">Вернуться к началу</a></p>
 
 <a name="Run-back"></a>
 ### Запуск бэкэнда проекта:
 
 Cоздать и активировать виртуальное окружение:
 
-```
+```bash
 python3 -m venv .venv
 ```
 
 * Если у вас Linux/macOS
 
-```
+```bash
 source .venv/bin/activate
 ```
 
 * Если у вас windows
 
-```
+```bash
 source .venv/Scripts/activate
 ```
 
-```
+```bash
 python3 -m pip install --upgrade pip
 ```
 
@@ -268,6 +279,11 @@ python manage.py runserver
 Основные точки доступа развёрнутого локально проекта:
 
 [Главная страница сайта](http://127.0.0.1:3000/)
+
 [Админ-панель](http://127.0.0.1:8000/admin/)
+
 [API-панель](http://127.0.0.1:8000/api/)
+
 [Документация к API](http://127.0.0.1:8000/api/docs/)
+
+<p align="right"><a href="#Start-point">Вернуться к началу</a></p>

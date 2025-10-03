@@ -12,9 +12,9 @@
 }
 
 .headerLogo {
-  max-width: 154px;
+  max-width: 220px;
   position: relative;
-  bottom: 12px;
+  bottom: 0px;
 }
 
 .headerLink {

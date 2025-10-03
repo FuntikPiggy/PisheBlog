@@ -7,7 +7,7 @@ const Technologies = () => {
   return <Main>
     <MetaTags>
       <title>О проекте</title>
-      <meta name="description" content="Фудграм - Технологии" />
+      <meta name="description" content="Пищеблог - Технологии" />
       <meta property="og:title" content="О проекте" />
     </MetaTags>
     

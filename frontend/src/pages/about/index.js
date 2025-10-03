@@ -7,7 +7,7 @@ const About = ({ updateOrders, orders }) => {
   return <Main>
     <MetaTags>
       <title>О проекте</title>
-      <meta name="description" content="Фудграм - О проекте" />
+      <meta name="description" content="Пищеблог - О проекте" />
       <meta property="og:title" content="О проекте" />
     </MetaTags>
     
@@ -45,7 +45,7 @@ const About = ({ updateOrders, orders }) => {
           </h2>
           <div className={styles.text}>
             <p className={styles.textItem}>
-              Код проекта находится тут - <a href="https://github.com/FuntikPiggy" className={styles.textLink}>Github</a> (Скрыт до момента защиты проекта)
+              Код проекта находится тут - <a href="https://github.com/FuntikPiggy" className={styles.textLink}>Github</a>
             </p>
             <p className={styles.textItem}>
               Автор проекта: <a href="https://vk.com/no_rear_gear" className={styles.textLink}>Гурин Валерий Сергеевич</a>
