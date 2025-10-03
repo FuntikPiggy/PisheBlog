@@ -1,16 +1,15 @@
 [![Main Foodgram workflow](https://github.com/FuntikPiggy/foodgram/actions/workflows/main.yml/badge.svg)](https://github.com/FuntikPiggy/foodgram/actions/workflows/main.yml)
 <a name="Start-point"></a>
-# Пищеблог
+# Пищеблог <img align="right" width="120" height="42" alt="logo_readme" src="https://github.com/user-attachments/assets/9bc7311a-2f3c-414b-8ed7-463b44a8d3b3" />
 
-**********
-## [О проекте.](#anchor-about)
-**********
-## [Как запустить проект в контейнерах Docker.](#How-to-run-Docker)
-**********
-## [Как запустить проект локально, без Docker.](#How-to-run-w/o-Docker)
-#### [Запуск фронтенда проекта.](#Run-front)
-#### [Запуск базы данных проекта.](#Run-db)
-#### [Запуск бэкэнда проекта.](#Run-back)
+
+
+* #### [О проекте.](#anchor-about)
+* #### [Как запустить проект в контейнерах Docker.](#How-to-run-Docker)
+* #### [Как запустить проект локально, без Docker.](#How-to-run-w/o-Docker)
+    * [Запуск фронтенда проекта.](#Run-front)
+    * [Запуск базы данных проекта.](#Run-db)
+    * [Запуск бэкэнда проекта.](#Run-back)
 **********
 
 
@@ -24,7 +23,7 @@
 
 Авторы проекта:
 
-Гурин Валерий - (GitHub - [FuntikPiggy](https://github.com/FuntikPiggy))
+Гурин Валерий - ([GitHub](https://github.com/FuntikPiggy), [Telegram](https://t.me/CallSign_Yakuza))
 
 
 ### Технические подробности
