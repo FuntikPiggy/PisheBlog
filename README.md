@@ -92,9 +92,9 @@ cd backend
 pip install -r requirements.txt
 ```
 
+<a name="env-file"></a>
 Создать файл .evn для хранения ключей в корне проекта:
 
-<a name="env-file"></a>
 ```bash
 POSTGRES_USER=<имя пользователя БД>
 POSTGRES_PASSWORD=<пароль БД>
@@ -152,9 +152,8 @@ git clone https://github.com/FuntikPiggy/pisheblog.git
 cd pisheblog
 ```
 
-Создать файл .evn для хранения ключей в корне проекта (пример заполнения смотри [выше](#env-file))
+Создать файл .evn для хранения ключей в корне проекта (пример заполнения смотри [выше](#env-file)).
 
-<p align="right"><a href="#Start-point">Вернуться к началу</a></p>
 
 <a name="Run-front"></a>
 ### Запуск фронтенда проекта:
