@@ -130,4 +130,4 @@ jobs:
       with:
         to: ${{ secrets.TELEGRAM_TO }}
         token: ${{ secrets.TELEGRAM_TOKEN }}
-        message: Деплой проекта FoodGram успешно выполнен! (Сообщение от ${{ github.actor }} - ${{ github.event.commits[0].message }})
+        message: Деплой проекта ПищеБлог успешно выполнен! (Сообщение от ${{ github.actor }} - ${{ github.event.commits[0].message }})
