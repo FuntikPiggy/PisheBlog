@@ -1,6 +1,6 @@
-[![Main Foodgram workflow](https://github.com/FuntikPiggy/foodgram/actions/workflows/main.yml/badge.svg)](https://github.com/FuntikPiggy/foodgram/actions/workflows/main.yml)
+[![Main PisheBlog workflow](https://github.com/FuntikPiggy/pisheblog/actions/workflows/main.yml/badge.svg)](https://github.com/FuntikPiggy/pisheblog/actions/workflows/main.yml)
 <a name="Start-point"></a>
-# ПищеБлог (ex. FoodGram)<img align="right" width="120" height="42" alt="logo_readme" src="https://github.com/user-attachments/assets/9bc7311a-2f3c-414b-8ed7-463b44a8d3b3" />
+# ПищеБлог<img align="right" width="120" height="42" alt="logo_readme" src="https://github.com/user-attachments/assets/9bc7311a-2f3c-414b-8ed7-463b44a8d3b3" />
 
 
 
@@ -53,9 +53,9 @@ WSGI-сервер - [Gunicorn](https://gunicorn.org/).
 
 
 ```bash
-git clone https://github.com/FuntikPiggy/foodgram.git
+git clone https://github.com/FuntikPiggy/pisheblog.git
 
-cd foodgram
+cd pisheblog
 ```
 
 Cоздать и активировать виртуальное окружение:
@@ -94,6 +94,7 @@ pip install -r requirements.txt
 
 Создать файл .evn для хранения ключей в корне проекта:
 
+<a name="env-file"></a>
 ```bash
 POSTGRES_USER=<имя пользователя БД>
 POSTGRES_PASSWORD=<пароль БД>
@@ -107,11 +108,11 @@ DB_PROD_TYPE=True  # Любая строка == True (для Postgres), не з�
 CSRF_TRUSTED='<https://subdomain.example.com>'  # Ваш адрес
 ```
 
-Из папки "foodgram" запустить проект:
+Из папки "pisheblog" запустить проект:
 
 ```bash
 cd ..
-docker compose -f docker-compose.production.yml up
+docker compose up
 ```
 
 Выполнить миграции, сбор статики:
@@ -146,25 +147,12 @@ sudo docker compose exec backend python manage.py createsuperuser
 Клонировать репозиторий и перейти в него в командной строке:
 
 ```bash
-git clone https://github.com/FuntikPiggy/foodgram.git
+git clone https://github.com/FuntikPiggy/pisheblog.git
 
-cd foodgram
+cd pisheblog
 ```
 
-Создать файл .evn для хранения ключей в корне проекта:
-
-```bash
-POSTGRES_USER=<имя пользователя БД>
-POSTGRES_PASSWORD=<пароль БД>
-POSTGRES_DB=<имя БД>
-DB_HOST=db
-DB_PORT=5430
-DJANGO_SECRET_KEY=<секретный ключ Django>
-DJANGO_ALLOWED_HOSTS=<имя или IP-адрес хоста>
-DEBUG_MODE=  # Любая строка == True, не заполнено == False
-DB_PROD_TYPE=True  # Любая строка == True (для Postgres), не заполнено == False(для SQLite)
-CSRF_TRUSTED='<https://subdomain.example.com>'  # Ваш адрес
-```
+Создать файл .evn для хранения ключей в корне проекта (пример заполнения смотри [выше](#env-file))
 
 <p align="right"><a href="#Start-point">Вернуться к началу</a></p>
 
