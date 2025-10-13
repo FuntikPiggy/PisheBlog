@@ -22,7 +22,7 @@
 блюда, просмотреть рецепты друзей и добавить любимые рецепты в список избранных.
 
 <img width="300" height="400" alt="PisheBlog_08" src="https://github.com/user-attachments/assets/2b446e59-5288-418a-b46c-e8405be4003b" />
-<img width="300" height="403" alt="PisheBlog_04" src="https://github.com/user-attachments/assets/dcad0071-2b88-4978-82f9-b14110814ed6" />
+<img width="300" height="403" alt="PisheBlog_04" src="https://github.com/user-attachments/assets/2c2e435f-d1f8-45a7-a5e7-b5a8a861c9f7" />
 <img width="300" height="401" alt="PisheBlog_05" src="https://github.com/user-attachments/assets/6d0d47f1-a3a8-4654-a0a4-bdc3082a3b8d" />
 <img width="300" height="403" alt="PisheBlog_06" src="https://github.com/user-attachments/assets/fa43c626-0b1f-4ec3-90c3-db74d825976d" />
 
