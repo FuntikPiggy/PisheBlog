@@ -10,12 +10,14 @@ User = get_user_model()
 class RecipeFilter(filters.FilterSet):
     """Фильтр для рецептов"""
 
+    tags = filters.AllValuesMultipleFilter(
+        field_name='tags__slug', lookup_expr='contains',)
     is_in_shopping_cart = NumberFilter(method='filter_is_in_shopping_cart')
     is_favorited = NumberFilter(method='filter_is_favorited')
 
     class Meta:
         model = Recipe
-        fields = ('author', 'is_favorited', 'is_in_shopping_cart',)
+        fields = ('author', 'tags', 'is_favorited', 'is_in_shopping_cart')
 
     def filter_is_in_shopping_cart(self, queryset, name, value):
         return queryset.filter(purchases__user_id=self.request.user.id)

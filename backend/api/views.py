@@ -101,6 +101,7 @@ class TagViewSet(ReadOnlyModelViewSet):
     """Представление модели тэга."""
 
     queryset = Tag.objects.all()
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = TagSerializer
     pagination_class = None
 
@@ -109,6 +110,7 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     """Представление модели продукта."""
 
     queryset = Ingredient.objects.all()
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = IngredientSerializer
     filter_backends = (filters.SearchFilter, DjangoFilterBackend,)
     filterset_class = IngredientFilter
