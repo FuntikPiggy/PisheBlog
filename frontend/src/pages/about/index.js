@@ -45,15 +45,20 @@ const About = ({ updateOrders, orders }) => {
           </h2>
           <div className={styles.text}>
             <p className={styles.textItem}>
-              Код проекта находится тут - <a href="https://github.com/FuntikPiggy" className={styles.textLink}>Github</a>
+              Код проекта находится тут - <a href="https://github.com/FuntikPiggy"
+                                             className={styles.textLink}>Github</a>
             </p>
             <p className={styles.textItem}>
-              Автор проекта: <a href="https://vk.com/no_rear_gear" className={styles.textLink}>Гурин Валерий Сергеевич</a>
+              Автор проекта: Гурин Валерий Сергеевич
+            </p>
+            <p className={styles.textItem}>
+              Автор проекта: <a href="https://vk.com/FuntikPiggy" className={styles.textLink}>VK</a>, <a
+                href="https://t.me/FuntikPiggy" className={styles.textLink}>Telegram</a>
             </p>
           </div>
         </aside>
       </div>
-      
+
     </Container>
   </Main>
 }
