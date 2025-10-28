@@ -30,7 +30,7 @@
 
 Авторы проекта:
 
-Гурин Валерий - ([GitHub](https://github.com/FuntikPiggy), [Telegram](https://t.me/CallSign_Yakuza))
+Гурин Валерий - ([GitHub](https://github.com/FuntikPiggy), [Telegram](https://t.me/FuntikPiggy))
 
 
 ### Технические подробности
